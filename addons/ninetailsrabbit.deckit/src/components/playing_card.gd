@@ -58,6 +58,7 @@ func default_orientation_is_face_up() -> bool:
 func default_orientation_is_face_down() -> bool:
 	return default_orientation == DeckitPlayingCard.Orientation.FaceDown
 
+
 #region Suit information
 func is_spanish() -> bool:
 	return suit in SpanishSuits
