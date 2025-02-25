@@ -8,13 +8,38 @@
 
 config_version=5
 
+[Deckit]
+
+config/ninetailsrabbit.deckit/update_notification_enabled=true
+
 [application]
 
-config/name="godot-plugin-template"
+config/name="Deckit"
+config/description="A framework in Godot to manage playing cards and create games of this kind in no time at all."
+config/version="1.0.0"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[display]
+
+window/size/viewport_width=640
+window/size/viewport_height=360
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/ninetailsrabbit.deckit/plugin.cfg")
+
+[file_customization]
+
+folder_colors={
+"res://addons/": "yellow"
+}
+
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
