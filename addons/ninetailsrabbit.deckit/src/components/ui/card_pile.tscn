@@ -10,6 +10,7 @@ layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_0ecm5")
 stack_mode = 2
+stack_direction = Vector2i(0, 0)
 stack_separation = null
 
 [node name="CardDetectionArea" type="Area2D" parent="."]

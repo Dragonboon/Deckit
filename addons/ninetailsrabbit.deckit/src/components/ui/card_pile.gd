@@ -35,7 +35,7 @@ enum StackMode {
 ## Set the stack mode to display the cards as they are dropped
 @export var stack_mode: StackMode = StackMode.InPlaceFaceUp
 ## Only used when CustomDirection is selected. Choose a direction in which the cards will be accumulated, the vectors are normalized.
-@export var stack_direction: Vector2i = Vector2i.ZERO
+@export var stack_direction: Vector2 = Vector2i.ZERO
 ## The amount of space between cards as the stack grows.
 @export var stack_separation: Vector2 = Vector2.ONE
 ## Set the min angle in degrees to apply in a card when is dropped
@@ -179,6 +179,12 @@ func on_added_card(new_card: DeckitPlayingCardUI) -> void:
 	new_card.position = position
 	new_card.set_deferred("z_index", new_card.z_index + current_cards.size())
 	
+	match stack_mode:
+		StackMode.InPlaceFaceUp:
+				new_card.face_up()
+		StackMode.InPlaceFaceDown:
+				new_card.face_down()
+				
 	if current_cards.size() > 1:
 		match stack_mode:
 			StackMode.VerticalDown:
@@ -189,3 +195,5 @@ func on_added_card(new_card: DeckitPlayingCardUI) -> void:
 				new_card.position += (stack_separation * Vector2.RIGHT) * (current_cards.size() - 1)
 			StackMode.HorizontalLeft:
 				new_card.position += (stack_separation * Vector2.LEFT) * (current_cards.size() - 1)
+			StackMode.CustomDirection:
+				new_card.position += (stack_separation * stack_direction) * (current_cards.size() - 1)
