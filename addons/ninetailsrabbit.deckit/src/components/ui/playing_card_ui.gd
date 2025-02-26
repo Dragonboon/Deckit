@@ -1,4 +1,4 @@
-@icon("res://addons/ninetailsrabbit.deckit/assets/deckit.svg")
+@icon("res://addons/ninetailsrabbit.deckit/assets/playing_card.svg")
 class_name DeckitPlayingCardUI extends Control
 
 const GroupName: StringName = &"playing-cards"
@@ -36,7 +36,7 @@ enum DisplayShadowModes {
 			
 			if is_inside_tree() and shadow:
 				shadow.position.x = card.position.x + shadow_horizontal_depth
-
+			
 @onready var card_texture: TextureRect = $CardTexture
 @onready var shadow: TextureRect = $Shadow
 @onready var draggable_2d: DeckitDraggable2D = $CardTexture/Draggable2D
@@ -66,6 +66,8 @@ var is_locked: bool = false:
 			else:
 				draggable_2d.unlock()
 
+var detected_pile: CardPile
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	## TODO- TEMPORARY MANUAL CHANGE OF THE ORIENTATION
@@ -83,6 +85,9 @@ func _ready() -> void:
 	_center_pivot()
 	_prepare_draggable()
 	_prepare_card_area()
+	
+	card_area.area_entered.connect(on_drop_zone_entered)
+	card_area.area_exited.connect(on_drop_zone_exited)
 
 
 func face_up() -> void:
@@ -181,10 +186,10 @@ func _prepare_draggable() -> void:
 func _prepare_card_area() -> void:
 	await get_tree().physics_frame
 	
-	card_area.collision_layer = DeckitUtils.collision_layer_to_value(pieces_collision_layer)
-	card_area.collision_mask = 0
-	card_area.monitorable = true
-	card_area.monitoring = false
+	card_area.collision_layer = 0
+	card_area.collision_mask = DeckitUtils.collision_layer_to_value(pieces_collision_layer)
+	card_area.monitorable = false
+	card_area.monitoring = true
 	card_area.priority = 1
 	card_area_collision.shape.size = (card.front_texture.get_size() * card_area_scale) * card_texture.scale
 
@@ -194,6 +199,15 @@ func _center_pivot() -> void:
 
 
 #region Signal callbacks
+func on_drop_zone_entered(other_area: Area2D) -> void:
+	if card.can_be_dropped_on_piles:
+		detected_pile = other_area.get_parent() as CardPile
+
+
+func on_drop_zone_exited(other_area: Area2D) -> void:
+	detected_pile = null
+
+
 func on_drag() -> void:
 	if is_display_shadow_on_drag():
 		shadow.show()
@@ -202,6 +216,12 @@ func on_drag() -> void:
 func on_drag_released() -> void:
 	if is_display_shadow_on_drag():
 		shadow.hide()
+		
+	if detected_pile and detected_pile.card_can_be_added_to_pile(self):
+		lock()
+		detected_pile.add_card(self)
+		position = detected_pile.position
+		detected_pile = null
 
 
 func on_draggable_2d_hover() -> void:

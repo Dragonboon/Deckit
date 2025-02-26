@@ -9,6 +9,7 @@ size = Vector2(37, 52)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_0ecm5")
+stack_separation = null
 
 [node name="CardDetectionArea" type="Area2D" parent="."]
 collision_layer = 0

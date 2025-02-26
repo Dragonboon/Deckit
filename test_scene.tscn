@@ -11,6 +11,9 @@ script = ExtResource("4_b2i23")
 id = &"hearts-13"
 display_name = "King of Hearts"
 description = ""
+can_be_dropped_on_piles = true
+can_be_discarded = true
+can_be_added_to_hand = true
 texture_size = Vector2(0, 0)
 front_texture = ExtResource("3_70ly1")
 back_texture = ExtResource("2_0xilr")
@@ -45,9 +48,32 @@ offset_right = 71.0
 offset_bottom = 83.0
 card = SubResource("Resource_nfqr2")
 
+[node name="DeckitPlayingCardUI2" parent="." instance=ExtResource("1_gpf0u")]
+offset_left = 77.0
+offset_top = 122.0
+offset_right = 77.0
+offset_bottom = 122.0
+card = SubResource("Resource_nfqr2")
+
+[node name="DeckitPlayingCardUI3" parent="." instance=ExtResource("1_gpf0u")]
+offset_left = 90.0
+offset_top = 173.0
+offset_right = 90.0
+offset_bottom = 173.0
+card = SubResource("Resource_nfqr2")
+
+[node name="DeckitPlayingCardUI4" parent="." instance=ExtResource("1_gpf0u")]
+offset_left = 143.0
+offset_top = 148.0
+offset_right = 143.0
+offset_bottom = 148.0
+card = SubResource("Resource_nfqr2")
+
 [node name="CardPile" parent="." instance=ExtResource("5_appcp")]
 offset_left = 211.0
 offset_top = 97.0
 offset_right = 211.0
 offset_bottom = 97.0
 detection_area_size = Vector2(37, 52)
+stack_separation = Vector2(1, 1)
+allowed_french_suits = Array[int]([5, 3, 6])

@@ -35,6 +35,10 @@ enum Orientation {
 @export var id: StringName
 @export var display_name: String
 @export_multiline var description: String
+@export_group("Behaviour")
+@export var can_be_dropped_on_piles: bool = true
+@export var can_be_discarded: bool = true
+@export var can_be_added_to_hand: bool = true
 @export_group("Texture")
 ## When is not Vector2(0, 0) this size will override the original one
 @export var texture_size: Vector2 = Vector2.ZERO
