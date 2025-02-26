@@ -86,6 +86,7 @@ func _ready() -> void:
 	_prepare_draggable()
 	_prepare_card_area()
 	
+	draggable_2d.unlocked.connect(on_drag_unlocked)
 	card_area.area_entered.connect(on_drop_zone_entered)
 	card_area.area_exited.connect(on_drop_zone_exited)
 
@@ -219,12 +220,16 @@ func on_drag_released() -> void:
 	if is_display_shadow_on_drag():
 		shadow.hide()
 	
-	z_index = 0
 	
 	if detected_pile and detected_pile.card_can_be_added_to_pile(self):
 		lock()
 		detected_pile.add_card(self)
 		detected_pile = null
+
+
+func on_drag_unlocked() -> void:
+	if not is_locked:
+		z_index = 0 ## It's reset here because the animations can be running until unlock the drag again
 
 
 func on_draggable_2d_hover() -> void:

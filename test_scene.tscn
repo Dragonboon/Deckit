@@ -1,6 +1,7 @@
-[gd_scene load_steps=13 format=3 uid="uid://dkv01xl0df4g5"]
+[gd_scene load_steps=14 format=3 uid="uid://dkv01xl0df4g5"]
 
 [ext_resource type="PackedScene" uid="uid://dypmo68q4swhg" path="res://addons/ninetailsrabbit.deckit/src/components/ui/playing_card_ui.tscn" id="1_gpf0u"]
+[ext_resource type="Script" path="res://test_scene.gd" id="1_nlxlq"]
 [ext_resource type="Texture2D" uid="uid://dvmcvaaa1hjqt" path="res://addons/ninetailsrabbit.deckit/assets/Back_1.png" id="2_0xilr"]
 [ext_resource type="Texture2D" uid="uid://guhah5g3mqtv" path="res://addons/ninetailsrabbit.deckit/assets/Clubs_1.png" id="3_3p401"]
 [ext_resource type="Texture2D" uid="uid://dygtx6fgoowak" path="res://addons/ninetailsrabbit.deckit/assets/Hearts_13.png" id="3_70ly1"]
@@ -81,6 +82,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
+script = ExtResource("1_nlxlq")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1

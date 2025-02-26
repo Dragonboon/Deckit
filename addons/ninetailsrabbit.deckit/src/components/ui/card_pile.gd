@@ -9,7 +9,6 @@ signal removed_card(card: DeckitPlayingCardUI)
 signal removed_cards(cards: Array[DeckitPlayingCardUI])
 signal add_card_request_denied(card: DeckitPlayingCardUI)
 signal emptied(cards: Array[DeckitPlayingCardUI])
-signal filled
 
 
 enum StackMode {
@@ -70,6 +69,7 @@ func _ready() -> void:
 	_prepare_card_detection_area()
 	
 	added_card.connect(on_added_card)
+	removed_card.connect(on_removed_card)
 
 
 func change_detection_area_size(new_size: Vector2) -> void:
@@ -116,6 +116,16 @@ func remove_card_at_position(idx: int) -> void:
 	if card != null:
 		remove_card(card)
 	
+	
+func remove_random_card() -> DeckitPlayingCardUI:
+	if is_empty():
+		return null
+	
+	var card: DeckitPlayingCardUI = current_cards.pick_random()
+	remove_card(card)
+	
+	return card
+	
 
 func clear() -> void:
 	if is_empty():
@@ -124,7 +134,7 @@ func clear() -> void:
 	emptied.emit(current_cards)
 	remove_cards(current_cards)
 
-
+#region Accessors
 func bottom_card() -> DeckitPlayingCardUI:
 	if is_empty():
 		return null
@@ -137,6 +147,13 @@ func top_card() -> DeckitPlayingCardUI:
 		return null
 	 
 	return current_cards.back()
+
+
+func middle_card() -> DeckitPlayingCardUI:
+	if current_cards.size() > 2:
+		return current_cards[floor(current_cards.size() / 2.0)]
+		
+	return null
 
 
 func card_at_position(idx: int) -> DeckitPlayingCardUI:
@@ -165,6 +182,7 @@ func total_card_table_value() -> float:
 	return current_cards.reduce(
 		func(accum: float, playing_card: DeckitPlayingCardUI): return playing_card.card.table_value + accum, 0.0)
 
+#endregion
 
 func _prepare_card_detection_area() -> void:
 	card_detection_area.monitorable = true
@@ -174,26 +192,45 @@ func _prepare_card_detection_area() -> void:
 	card_detection_area.priority = 2
 	change_detection_area_size(detection_area_size)
 
+#region Stack
+func adjust_cards_to_stack() -> void:
+	for card: DeckitPlayingCardUI in current_cards:
+		adjust_card_to_stack(card)
 
-func on_added_card(new_card: DeckitPlayingCardUI) -> void:
+
+func adjust_card_to_stack(new_card: DeckitPlayingCardUI) -> void:
+	var index: int = current_cards.find(new_card)
+	
 	new_card.position = position
-	new_card.set_deferred("z_index", new_card.z_index + current_cards.size())
+	new_card.set_deferred("z_index", index)
 	
 	match stack_mode:
 		StackMode.InPlaceFaceUp:
-				new_card.face_up()
+			new_card.face_up()
 		StackMode.InPlaceFaceDown:
-				new_card.face_down()
+			new_card.face_down()
 				
-	if current_cards.size() > 1:
+	if index > 0:
 		match stack_mode:
 			StackMode.VerticalDown:
-				new_card.position += (stack_separation * Vector2.DOWN) * (current_cards.size() - 1)
+				new_card.position += (stack_separation * Vector2.DOWN) * index
 			StackMode.VerticalUp:
-				new_card.position += (stack_separation * Vector2.UP) * (current_cards.size() - 1)
+				new_card.position += (stack_separation * Vector2.UP) * index
 			StackMode.HorizontalRight:
-				new_card.position += (stack_separation * Vector2.RIGHT) * (current_cards.size() - 1)
+				new_card.position += (stack_separation * Vector2.RIGHT) * index
 			StackMode.HorizontalLeft:
-				new_card.position += (stack_separation * Vector2.LEFT) * (current_cards.size() - 1)
+				new_card.position += (stack_separation * Vector2.LEFT) * index
 			StackMode.CustomDirection:
-				new_card.position += (stack_separation * stack_direction) * (current_cards.size() - 1)
+				new_card.position += (stack_separation * stack_direction) * index
+
+#endregion
+
+#region Signal callbacks
+func on_added_card(new_card: DeckitPlayingCardUI) -> void:
+	adjust_card_to_stack(new_card)
+	
+
+func on_removed_card(_removed_card: DeckitPlayingCardUI) -> void:
+	adjust_cards_to_stack()
+
+#endregion
