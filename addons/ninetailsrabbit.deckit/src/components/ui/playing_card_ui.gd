@@ -72,11 +72,8 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	_prepare_card_texture()
 	_prepare_shadow()
+	_prepare_draggable()
 	_center_pivot()
-	
-	draggable_2d.is_locked = is_locked
-	draggable_2d.dragged.connect(on_drag)
-	draggable_2d.released.connect(on_drag_released)
 
 
 func face_up() -> void:
@@ -153,6 +150,16 @@ func _prepare_shadow() -> void:
 	else:
 		shadow.hide()
 		
+		
+func _prepare_draggable() -> void:
+	draggable_2d.is_locked = is_locked
+	draggable_2d.dragged.connect(on_drag)
+	draggable_2d.released.connect(on_drag_released)
+	draggable_2d.mouse_entered.connect(on_draggable_2d_hover)
+	draggable_2d.mouse_exited.connect(on_draggable_2d_hover_exited)
+	draggable_2d.focus_entered.connect(on_draggable_2d_focus_entered)
+	draggable_2d.focus_exited.connect(on_draggable_2d_focus_exited)
+	
 
 func _center_pivot() -> void:
 	card_texture.pivot_offset = (card_texture.texture.get_size() / 2).ceil()
@@ -167,3 +174,19 @@ func on_drag() -> void:
 func on_drag_released() -> void:
 	if is_display_shadow_on_drag():
 		shadow.hide()
+
+
+func on_draggable_2d_hover() -> void:
+	pass
+
+
+func on_draggable_2d_hover_exited() -> void:
+	pass
+	
+
+func on_draggable_2d_focus_entered() -> void:
+	pass
+	
+	
+func on_draggable_2d_focus_exited() -> void:
+	pass
