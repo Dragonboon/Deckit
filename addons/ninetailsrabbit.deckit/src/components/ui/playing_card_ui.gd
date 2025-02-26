@@ -14,6 +14,10 @@ enum DisplayShadowModes {
 }
 
 @export var card: DeckitPlayingCard
+@export_category("Detection areas")
+@export var pieces_collision_layer: int = 8
+## Where 1 uses the full size of the card texture and 0.5 the half
+@export var card_area_scale: float = 0.85
 @export_category("Shadow")
 @export var display_shadow_mode: DisplayShadowModes = DisplayShadowModes.OnDrag
 @export var shadow_color: Color = Color("080808a8")
@@ -36,6 +40,9 @@ enum DisplayShadowModes {
 @onready var card_texture: TextureRect = $CardTexture
 @onready var shadow: TextureRect = $Shadow
 @onready var draggable_2d: DeckitDraggable2D = $CardTexture/Draggable2D
+@onready var card_area: Area2D = $CardArea
+@onready var card_area_collision: CollisionShape2D = $CardArea/CollisionShape2D
+
 @onready var orientation: DeckitPlayingCard.Orientation = card.default_orientation:
 	set(value):
 		if orientation != value:
@@ -61,9 +68,10 @@ var is_locked: bool = false:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	## TODO- TEMPORARY MANUAL CHANGE OF THE ORIENTATION
 	if Input.is_action_just_pressed("right_click"):
 		toggle_orientation()
-
+		
 
 func _enter_tree() -> void:
 	add_to_group(GroupName)
@@ -72,8 +80,9 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	_prepare_card_texture()
 	_prepare_shadow()
-	_prepare_draggable()
 	_center_pivot()
+	_prepare_draggable()
+	_prepare_card_area()
 
 
 func face_up() -> void:
@@ -108,6 +117,14 @@ func lock() -> void:
 
 func unlock() -> void:
 	is_locked = false
+	
+
+func enable_card_area() -> void:
+	card_area.monitorable = true
+	
+	
+func disable_card_area() -> void:
+	card_area.monitorable = false
 
 
 func is_display_shadow_always() -> bool:
@@ -161,6 +178,17 @@ func _prepare_draggable() -> void:
 	draggable_2d.focus_exited.connect(on_draggable_2d_focus_exited)
 	
 
+func _prepare_card_area() -> void:
+	await get_tree().physics_frame
+	
+	card_area.collision_layer = DeckitUtils.collision_layer_to_value(pieces_collision_layer)
+	card_area.collision_mask = 0
+	card_area.monitorable = true
+	card_area.monitoring = false
+	card_area.priority = 1
+	card_area_collision.shape.size = (card.front_texture.get_size() * card_area_scale) * card_texture.scale
+
+	
 func _center_pivot() -> void:
 	card_texture.pivot_offset = (card_texture.texture.get_size() / 2).ceil()
 

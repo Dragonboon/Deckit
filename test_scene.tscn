@@ -1,0 +1,53 @@
+[gd_scene load_steps=7 format=3 uid="uid://dkv01xl0df4g5"]
+
+[ext_resource type="PackedScene" uid="uid://dypmo68q4swhg" path="res://addons/ninetailsrabbit.deckit/src/components/ui/playing_card_ui.tscn" id="1_gpf0u"]
+[ext_resource type="Texture2D" uid="uid://dvmcvaaa1hjqt" path="res://addons/ninetailsrabbit.deckit/assets/Back_1.png" id="2_0xilr"]
+[ext_resource type="Texture2D" uid="uid://dygtx6fgoowak" path="res://addons/ninetailsrabbit.deckit/assets/Hearts_13.png" id="3_70ly1"]
+[ext_resource type="Script" path="res://addons/ninetailsrabbit.deckit/src/components/playing_card.gd" id="4_b2i23"]
+[ext_resource type="PackedScene" uid="uid://c5t5udmax5nfo" path="res://addons/ninetailsrabbit.deckit/src/components/ui/card_pile.tscn" id="5_appcp"]
+
+[sub_resource type="Resource" id="Resource_nfqr2"]
+script = ExtResource("4_b2i23")
+id = &"hearts-13"
+display_name = "King of Hearts"
+description = ""
+texture_size = Vector2(0, 0)
+front_texture = ExtResource("3_70ly1")
+back_texture = ExtResource("2_0xilr")
+suit = 4
+value = 13.0
+table_value = 13.0
+default_orientation = 0
+
+[node name="TestScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(3.60981e-07, 0.296768, 0.22019, 1)
+
+[node name="DeckitPlayingCardUI" parent="." instance=ExtResource("1_gpf0u")]
+offset_left = 71.0
+offset_top = 83.0
+offset_right = 71.0
+offset_bottom = 83.0
+card = SubResource("Resource_nfqr2")
+
+[node name="CardPile" parent="." instance=ExtResource("5_appcp")]
+offset_left = 211.0
+offset_top = 97.0
+offset_right = 211.0
+offset_bottom = 97.0
+detection_area_size = Vector2(37, 52)
