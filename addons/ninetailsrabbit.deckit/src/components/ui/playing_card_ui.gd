@@ -11,7 +11,7 @@ signal orientation_changed(from: DeckitPlayingCard.Orientation, to: DeckitPlayin
 @export var card: DeckitPlayingCard
 @export_category("Shadow")
 @export var shadow_color: Color = Color("080808a8")
-@export var shadow_vertical_depth: float = 1.5:
+@export var shadow_vertical_depth: float = 2.0:
 	set(value):
 		if shadow_vertical_depth != value:
 			shadow_vertical_depth = maxf(0.01, value)
@@ -19,7 +19,7 @@ signal orientation_changed(from: DeckitPlayingCard.Orientation, to: DeckitPlayin
 		if is_inside_tree() and shadow:
 			shadow.position.y = card.position.y + shadow_vertical_depth
 		
-@export var shadow_horizontal_depth: float = 1.0:
+@export var shadow_horizontal_depth: float = 1.5:
 	set(value):
 		if shadow_horizontal_depth != value:
 			shadow_horizontal_depth = maxf(0.01, value)
@@ -46,6 +46,17 @@ signal orientation_changed(from: DeckitPlayingCard.Orientation, to: DeckitPlayin
 			orientation_changed.emit(previuos_orientation, orientation)
 
 
+var is_locked: bool = false:
+	set(value):
+		if is_locked != value:
+			is_locked = value
+			
+			if is_locked:
+				draggable_2d.lock()
+			else:
+				draggable_2d.unlock()
+			
+
 func _enter_tree() -> void:
 	add_to_group(GroupName)
 	
@@ -55,6 +66,7 @@ func _ready() -> void:
 	_prepare_shadow()
 	_center_pivot()
 	
+	draggable_2d.is_locked = is_locked
 	draggable_2d.dragged.connect(on_drag)
 	draggable_2d.released.connect(on_drag_released)
 
