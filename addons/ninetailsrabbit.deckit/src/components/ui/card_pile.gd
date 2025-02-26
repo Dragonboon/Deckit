@@ -9,6 +9,7 @@ signal removed_card(card: DeckitPlayingCardUI)
 signal removed_cards(cards: Array[DeckitPlayingCardUI])
 signal add_card_request_denied(card: DeckitPlayingCardUI)
 signal emptied(cards: Array[DeckitPlayingCardUI])
+signal filled
 
 
 enum StackMode {
@@ -30,6 +31,17 @@ enum StackMode {
 		if detection_area_size != value:
 			detection_area_size = value
 			change_detection_area_size(detection_area_size)
+
+@export_category("Visuals")
+@export var empty_pile_texture: Texture2D:
+	set(value):
+		if value != empty_pile_texture:
+			empty_pile_texture = value
+			
+			if empty_pile_texture_rect:
+				empty_pile_texture_rect.texture = empty_pile_texture
+				change_empty_texture_size(detection_area_size)
+					
 @export_category("Stack")
 ## Set the stack mode to display the cards as they are dropped
 @export var stack_mode: StackMode = StackMode.InPlaceFaceUp
@@ -58,7 +70,7 @@ enum StackMode {
 	DeckitPlayingCard.Suits.Spade,
 ]
 
-
+@onready var empty_pile_texture_rect: TextureRect = $EmptyPileTexture
 @onready var card_detection_area: Area2D = $CardDetectionArea
 @onready var card_detection_collision: CollisionShape2D = $CardDetectionArea/CollisionShape2D
 
@@ -67,16 +79,33 @@ var current_cards: Array[DeckitPlayingCardUI] = []
 
 func _ready() -> void:
 	_prepare_card_detection_area()
+	_prepare_empty_pile_texture()
 	
 	added_card.connect(on_added_card)
 	removed_card.connect(on_removed_card)
 
 
+#region Size
 func change_detection_area_size(new_size: Vector2) -> void:
 	if card_detection_area:
 		card_detection_collision.shape.size = new_size
+	
+		change_empty_texture_size(new_size)
 
 
+func change_empty_texture_size(new_size: Vector2) -> void:
+	DeckitUtils.center_pivot(empty_pile_texture_rect)
+	
+	empty_pile_texture_rect.mouse_filter = Control.MOUSE_FILTER_PASS
+	empty_pile_texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	empty_pile_texture_rect.custom_minimum_size = new_size
+	empty_pile_texture_rect.set_deferred("size", empty_pile_texture_rect.custom_minimum_size)
+	empty_pile_texture_rect.set_deferred("anchors_preset", Control.PRESET_CENTER)
+	empty_pile_texture_rect.position = Vector2.ZERO
+	
+#endregion
+
+#region Features
 func card_can_be_added_to_pile(playing_card: DeckitPlayingCardUI) -> bool:
 	var is_allowed_spanish_card: bool = playing_card.card.is_spanish() and playing_card.card.suit in allowed_spanish_suits
 	var is_allowed_french_card: bool = playing_card.card.is_french() and playing_card.card.suit in allowed_french_suits
@@ -90,7 +119,9 @@ func add_card(card: DeckitPlayingCardUI) -> void:
 		card.lock()
 		current_cards.append(card)
 		added_card.emit(card)
-		
+	else:
+		add_card_request_denied.emit(card)
+
 
 func add_cards(cards: Array[DeckitPlayingCardUI]) -> void:
 	for card: DeckitPlayingCardUI in cards:
@@ -133,6 +164,8 @@ func clear() -> void:
 		
 	emptied.emit(current_cards)
 	remove_cards(current_cards)
+
+#endregion
 
 #region Accessors
 func bottom_card() -> DeckitPlayingCardUI:
@@ -184,6 +217,7 @@ func total_card_table_value() -> float:
 
 #endregion
 
+#region Private 
 func _prepare_card_detection_area() -> void:
 	card_detection_area.monitorable = true
 	card_detection_area.monitoring = false
@@ -192,6 +226,14 @@ func _prepare_card_detection_area() -> void:
 	card_detection_area.priority = 2
 	change_detection_area_size(detection_area_size)
 
+
+func _prepare_empty_pile_texture() -> void:
+	if empty_pile_texture_rect:
+		empty_pile_texture_rect.texture = empty_pile_texture
+		change_empty_texture_size(detection_area_size)
+
+#endregion
+	
 #region Stack
 func adjust_cards_to_stack() -> void:
 	for card: DeckitPlayingCardUI in current_cards:
@@ -227,6 +269,9 @@ func adjust_card_to_stack(new_card: DeckitPlayingCardUI) -> void:
 
 #region Signal callbacks
 func on_added_card(new_card: DeckitPlayingCardUI) -> void:
+	if current_cards.size() == maximum_cards_in_pile:
+		filled.emit()
+		
 	adjust_card_to_stack(new_card)
 	
 

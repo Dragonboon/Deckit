@@ -20,3 +20,8 @@ static func collision_value_to_layer(value: int) -> int:
 	push_error("CollisionHelper->value_to_layer: The specified value %d) is invalid. Please ensure the value is a power of 2" % value)
 	
 	return 0
+	
+	
+static func center_pivot(texture_rect: TextureRect) -> void:
+	if texture_rect.texture:
+		texture_rect.pivot_offset = (texture_rect.texture.get_size() / 2).ceil()

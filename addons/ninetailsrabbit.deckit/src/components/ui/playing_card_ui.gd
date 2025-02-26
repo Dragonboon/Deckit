@@ -82,7 +82,9 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	_prepare_card_texture()
 	_prepare_shadow()
-	_center_pivot()
+	
+	DeckitUtils.center_pivot(card_texture)
+	
 	_prepare_draggable()
 	_prepare_card_area()
 	
@@ -150,7 +152,7 @@ func _prepare_card_texture() -> void:
 	card_texture.mouse_filter = Control.MOUSE_FILTER_PASS
 	card_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	card_texture.custom_minimum_size = card.front_texture.get_size() if card.texture_size.is_zero_approx() else card.texture_size
-	card_texture.set_deferred("size", card_texture.custom_minimum_size )
+	card_texture.set_deferred("size", card_texture.custom_minimum_size)
 	card_texture.position = Vector2.ZERO
 
 
@@ -195,10 +197,6 @@ func _prepare_card_area() -> void:
 	card_area_collision.shape.size = (card.front_texture.get_size() * card_area_scale) * card_texture.scale
 
 	
-func _center_pivot() -> void:
-	card_texture.pivot_offset = (card_texture.texture.get_size() / 2).ceil()
-
-
 #region Signal callbacks
 func on_drop_zone_entered(other_area: Area2D) -> void:
 	if card.can_be_dropped_on_piles:
@@ -219,7 +217,6 @@ func on_drag() -> void:
 func on_drag_released() -> void:
 	if is_display_shadow_on_drag():
 		shadow.hide()
-	
 	
 	if detected_pile and detected_pile.card_can_be_added_to_pile(self):
 		lock()
