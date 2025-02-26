@@ -4,11 +4,22 @@ class_name CardPile extends Control
 
 const GroupName: StringName = &"deck-piles"
 
+signal added_card(card: DeckitPlayingCardUI)
+signal removed_card(card: DeckitPlayingCardUI)
+signal removed_cards(cards: Array[DeckitPlayingCardUI])
+signal add_card_request_denied(card: DeckitPlayingCardUI)
+signal emptied(cards: Array[DeckitPlayingCardUI])
+signal filled
+
+
 enum StackMode {
 	VerticalUp,
 	VerticalDown,
+	HorizontalRight,
+	HorizontalLeft,
 	InPlaceFaceUp,
 	InPlaceFaceDown,
+	CustomDirection
 }
 
 ## A layer value between 0 and 32
@@ -23,7 +34,7 @@ enum StackMode {
 @export_category("Stack")
 ## Set the stack mode to display the cards as they are dropped
 @export var stack_mode: StackMode = StackMode.InPlaceFaceUp
-## Select a direction in which the cards will be accumulated, the vectors are normalized.
+## Only used when CustomDirection is selected. Choose a direction in which the cards will be accumulated, the vectors are normalized.
 @export var stack_direction: Vector2i = Vector2i.ZERO
 ## The amount of space between cards as the stack grows.
 @export var stack_separation: Vector2 = Vector2.ONE
@@ -58,13 +69,14 @@ var current_cards: Array[DeckitPlayingCardUI] = []
 func _ready() -> void:
 	_prepare_card_detection_area()
 	
-	
-func add_card(card: DeckitPlayingCardUI) -> void:
-	if card_can_be_added_to_pile(card):
-		card.lock()
-		current_cards.append(card)
-		
-		
+	added_card.connect(on_added_card)
+
+
+func change_detection_area_size(new_size: Vector2) -> void:
+	if card_detection_area:
+		card_detection_collision.shape.size = new_size
+
+
 func card_can_be_added_to_pile(playing_card: DeckitPlayingCardUI) -> bool:
 	var is_allowed_spanish_card: bool = playing_card.card.is_spanish() and playing_card.card.suit in allowed_spanish_suits
 	var is_allowed_french_card: bool = playing_card.card.is_french() and playing_card.card.suit in allowed_french_suits
@@ -72,10 +84,86 @@ func card_can_be_added_to_pile(playing_card: DeckitPlayingCardUI) -> bool:
 	return (maximum_cards_in_pile == 0 or (maximum_cards_in_pile > 0 and current_cards.size() < maximum_cards_in_pile)) \
 		and (is_allowed_spanish_card or is_allowed_french_card)
 	
+	
+func add_card(card: DeckitPlayingCardUI) -> void:
+	if card_can_be_added_to_pile(card):
+		card.lock()
+		current_cards.append(card)
+		added_card.emit(card)
+		
 
-func change_detection_area_size(new_size: Vector2) -> void:
-	if card_detection_area:
-		card_detection_collision.shape.size = new_size
+func add_cards(cards: Array[DeckitPlayingCardUI]) -> void:
+	for card: DeckitPlayingCardUI in cards:
+		add_card(card)
+
+
+func remove_card(card: DeckitPlayingCardUI) -> void:
+	if has_card(card):
+		current_cards.erase(card)
+		removed_card.emit(card)
+		
+		
+func remove_cards(cards: Array[DeckitPlayingCardUI] = current_cards) -> void:
+	for card: DeckitPlayingCardUI in cards:
+		remove_card(card)
+
+	removed_cards.emit(cards)
+	
+
+func remove_card_at_position(idx: int) -> void:
+	var card: DeckitPlayingCardUI = card_at_position(idx)
+	
+	if card != null:
+		remove_card(card)
+	
+
+func clear() -> void:
+	if is_empty():
+		return
+		
+	emptied.emit(current_cards)
+	remove_cards(current_cards)
+
+
+func bottom_card() -> DeckitPlayingCardUI:
+	if is_empty():
+		return null
+	 
+	return current_cards.front()
+
+
+func top_card() -> DeckitPlayingCardUI:
+	if is_empty():
+		return null
+	 
+	return current_cards.back()
+
+
+func card_at_position(idx: int) -> DeckitPlayingCardUI:
+	var index: int = current_cards.find(idx)
+	
+	if index != -1:
+		return current_cards[index]
+		
+	return null
+
+
+func has_card(card: DeckitPlayingCardUI) -> bool:
+	return current_cards.has(card)
+
+
+func is_empty() -> bool:
+	return current_cards.is_empty()
+
+
+func total_card_value() -> float:
+	return current_cards.reduce(
+		func(accum: float, playing_card: DeckitPlayingCardUI): return playing_card.card.value + accum, 0.0)
+
+
+func total_card_table_value() -> float:
+	return current_cards.reduce(
+		func(accum: float, playing_card: DeckitPlayingCardUI): return playing_card.card.table_value + accum, 0.0)
 
 
 func _prepare_card_detection_area() -> void:
@@ -85,3 +173,19 @@ func _prepare_card_detection_area() -> void:
 	card_detection_area.collision_mask = 0
 	card_detection_area.priority = 2
 	change_detection_area_size(detection_area_size)
+
+
+func on_added_card(new_card: DeckitPlayingCardUI) -> void:
+	new_card.position = position
+	new_card.set_deferred("z_index", new_card.z_index + current_cards.size())
+	
+	if current_cards.size() > 1:
+		match stack_mode:
+			StackMode.VerticalDown:
+				new_card.position += (stack_separation * Vector2.DOWN) * (current_cards.size() - 1)
+			StackMode.VerticalUp:
+				new_card.position += (stack_separation * Vector2.UP) * (current_cards.size() - 1)
+			StackMode.HorizontalRight:
+				new_card.position += (stack_separation * Vector2.RIGHT) * (current_cards.size() - 1)
+			StackMode.HorizontalLeft:
+				new_card.position += (stack_separation * Vector2.LEFT) * (current_cards.size() - 1)

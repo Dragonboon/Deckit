@@ -209,6 +209,8 @@ func on_drop_zone_exited(other_area: Area2D) -> void:
 
 
 func on_drag() -> void:
+	z_index = 999
+	
 	if is_display_shadow_on_drag():
 		shadow.show()
 	
@@ -216,11 +218,12 @@ func on_drag() -> void:
 func on_drag_released() -> void:
 	if is_display_shadow_on_drag():
 		shadow.hide()
-		
+	
+	z_index = 0
+	
 	if detected_pile and detected_pile.card_can_be_added_to_pile(self):
 		lock()
 		detected_pile.add_card(self)
-		position = detected_pile.position
 		detected_pile = null
 
 
