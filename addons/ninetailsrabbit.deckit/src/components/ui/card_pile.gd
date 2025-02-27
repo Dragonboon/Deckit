@@ -50,7 +50,7 @@ enum StackMode {
 			stack_mode = new_mode
 			adjust_cards_to_stack()
 ## Only used when CustomDirection is selected. Choose a direction in which the cards will be accumulated, the vectors are normalized.
-@export var stack_direction: Vector2 = Vector2.ZERO:
+@export var stack_direction: Vector2 = Vector2.ONE:
 	set(new_direction):
 		if new_direction != stack_direction:
 			stack_direction = new_direction
@@ -69,13 +69,15 @@ enum StackMode {
 @export_category("Rules")
 ## Set to zero to allow an infinite amount of cards
 @export var maximum_cards_in_pile: int = 0
-@export var allowed_spanish_suits: Array[DeckitPlayingCard.Suits] = [
+@export var figure_cards_allowed: bool = true
+@export var number_cards_allowed: bool = true
+@export var spanish_suits_allowed: Array[DeckitPlayingCard.Suits] = [
 	DeckitPlayingCard.Suits.Cup,
 	DeckitPlayingCard.Suits.Gold,
 	DeckitPlayingCard.Suits.Club,
 	DeckitPlayingCard.Suits.Sword,
 ]
-@export var allowed_french_suits: Array[DeckitPlayingCard.Suits] = [
+@export var french_suits_allowed: Array[DeckitPlayingCard.Suits] = [
 	DeckitPlayingCard.Suits.Diamond,
 	DeckitPlayingCard.Suits.Heart,
 	DeckitPlayingCard.Suits.Club,
@@ -119,11 +121,13 @@ func change_empty_texture_size(new_size: Vector2) -> void:
 
 #region Features
 func card_can_be_added_to_pile(playing_card: DeckitPlayingCardUI) -> bool:
-	var is_allowed_spanish_card: bool = playing_card.card.is_spanish() and playing_card.card.suit in allowed_spanish_suits
-	var is_allowed_french_card: bool = playing_card.card.is_french() and playing_card.card.suit in allowed_french_suits
+	var is_allowed_spanish_card: bool = playing_card.card.is_spanish() and playing_card.card.suit in spanish_suits_allowed
+	var is_allowed_french_card: bool = playing_card.card.is_french() and playing_card.card.suit in french_suits_allowed
+	var is_allowed_figure_card: bool = playing_card.card.is_figure() and figure_cards_allowed
+	var is_allowed_number_card: bool = playing_card.card.is_number() and number_cards_allowed
 	
 	return (maximum_cards_in_pile == 0 or (maximum_cards_in_pile > 0 and current_cards.size() < maximum_cards_in_pile)) \
-		and (is_allowed_spanish_card or is_allowed_french_card)
+		and ( (is_allowed_spanish_card or is_allowed_french_card) and (is_allowed_figure_card or is_allowed_number_card))
 	
 	
 func add_card(card: DeckitPlayingCardUI) -> void:

@@ -85,7 +85,7 @@ func is_ace() -> bool:
 	
 	
 func is_number() -> bool:
-	return value > 1 and value < 11 if is_french() else value > 1 and value < 8
+	return value >= 1 and value < 11 if is_french() else value >= 1 and value < 8
 
 
 func is_figure() -> bool:

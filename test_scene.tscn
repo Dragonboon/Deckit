@@ -28,8 +28,8 @@ default_orientation = 0
 
 [sub_resource type="Resource" id="Resource_h3d1w"]
 script = ExtResource("4_b2i23")
-id = &"hearts-13"
-display_name = "King of Hearts"
+id = &"spades-10"
+display_name = "Ten of spades"
 description = ""
 can_be_dropped_on_piles = true
 can_be_discarded = true
@@ -38,14 +38,14 @@ texture_size = Vector2(0, 0)
 front_texture = ExtResource("5_bj8q2")
 back_texture = ExtResource("2_0xilr")
 suit = 3
-value = 13.0
-table_value = 13.0
+value = 10.0
+table_value = 10.0
 default_orientation = 0
 
 [sub_resource type="Resource" id="Resource_2t17x"]
 script = ExtResource("4_b2i23")
-id = &"hearts-13"
-display_name = "King of Hearts"
+id = &"diamonds-8"
+display_name = "8 of diamonds"
 description = ""
 can_be_dropped_on_piles = true
 can_be_discarded = true
@@ -54,14 +54,14 @@ texture_size = Vector2(0, 0)
 front_texture = ExtResource("5_s1m7a")
 back_texture = ExtResource("2_0xilr")
 suit = 5
-value = 13.0
-table_value = 13.0
+value = 8.0
+table_value = 8.0
 default_orientation = 0
 
 [sub_resource type="Resource" id="Resource_a01kh"]
 script = ExtResource("4_b2i23")
-id = &"hearts-13"
-display_name = "King of Hearts"
+id = &"ace-spade"
+display_name = "Ace of spades"
 description = ""
 can_be_dropped_on_piles = true
 can_be_discarded = true
@@ -70,8 +70,8 @@ texture_size = Vector2(0, 0)
 front_texture = ExtResource("3_3p401")
 back_texture = ExtResource("2_0xilr")
 suit = 6
-value = 13.0
-table_value = 13.0
+value = 1.0
+table_value = 1.0
 default_orientation = 0
 
 [node name="TestScene" type="Control"]
@@ -128,7 +128,7 @@ offset_top = 97.0
 offset_right = 211.0
 offset_bottom = 97.0
 empty_pile_texture = ExtResource("2_0xilr")
-stack_mode = 6
-stack_direction = Vector2(1, 1)
-stack_separation = Vector2(5, 5)
-allowed_french_suits = Array[int]([5, 3, 6, 4])
+figure_cards_allowed = false
+number_cards_allowed = true
+spanish_suits_allowed = Array[int]([0, 1, 3, 2])
+french_suits_allowed = Array[int]([5, 4, 3, 6])
