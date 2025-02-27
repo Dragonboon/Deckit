@@ -115,11 +115,15 @@ func _ready() -> void:
 	
 func lock() -> void:
 	is_locked = true
+	disabled = true
+	hide()
 	reset_rotation()
 
 
 func unlock() -> void:
 	is_locked = false
+	disabled = false
+	show()
 
 
 func rotate_velocity(delta: float) -> void:
@@ -216,6 +220,7 @@ func on_mouse_drag_region_released() -> void:
 		draggable.z_as_relative = true
 		
 		punchy_hover_reset()
+		
 		reset_position()
 		reset_rotation()
 

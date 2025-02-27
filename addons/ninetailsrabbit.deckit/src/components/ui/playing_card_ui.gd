@@ -17,7 +17,14 @@ enum DisplayShadowModes {
 @export_category("Detection areas")
 @export var pieces_collision_layer: int = 8
 ## Where 1 uses the full size of the card texture and 0.5 the half
-@export var card_area_scale: float = 0.85
+@export var card_area_scale: float = 1.0:
+	set(new_scale):
+		if new_scale != card_area_scale:
+			card_area_scale = new_scale
+			
+			if card.front_texture:
+				card_area_collision.shape.size = (card.front_texture.get_size() * card_area_scale) * card_texture.scale
+			
 @export_category("Shadow")
 @export var display_shadow_mode: DisplayShadowModes = DisplayShadowModes.OnDrag
 @export var shadow_color: Color = Color("080808a8")
@@ -39,7 +46,7 @@ enum DisplayShadowModes {
 			
 @onready var card_texture: TextureRect = $CardTexture
 @onready var shadow: TextureRect = $Shadow
-@onready var draggable_2d: DeckitDraggable2D = $CardTexture/Draggable2D
+@onready var draggable_2d: DeckitDraggable2D = %Draggable2D
 @onready var card_area: Area2D = $CardArea
 @onready var card_area_collision: CollisionShape2D = $CardArea/CollisionShape2D
 
@@ -69,17 +76,13 @@ var is_locked: bool = false:
 var detected_pile: CardPile
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	## TODO- TEMPORARY MANUAL CHANGE OF THE ORIENTATION
-	if Input.is_action_just_pressed("right_click"):
-		toggle_orientation()
-		
-
 func _enter_tree() -> void:
 	add_to_group(GroupName)
 	
 
 func _ready() -> void:
+	card.z_as_relative = false
+
 	_prepare_card_texture()
 	_prepare_shadow()
 	
@@ -194,8 +197,9 @@ func _prepare_card_area() -> void:
 	card_area.monitorable = false
 	card_area.monitoring = true
 	card_area.priority = 1
-	card_area_collision.shape.size = (card.front_texture.get_size() * card_area_scale) * card_texture.scale
-
+	
+	if card.front_texture:
+		card_area_collision.shape.size = (card.front_texture.get_size() * card_area_scale) * card_texture.scale
 	
 #region Signal callbacks
 func on_drop_zone_entered(other_area: Area2D) -> void:
@@ -219,9 +223,9 @@ func on_drag_released() -> void:
 		shadow.hide()
 	
 	if detected_pile and detected_pile.card_can_be_added_to_pile(self):
-		lock()
 		detected_pile.add_card(self)
 		detected_pile = null
+		draggable_2d.release_focus()
 
 
 func on_drag_unlocked() -> void:

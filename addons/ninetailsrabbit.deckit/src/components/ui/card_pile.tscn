@@ -10,12 +10,6 @@ layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_0ecm5")
 detection_area_size = Vector2(37, 52)
-stack_mode = 2
-stack_direction = Vector2(0, 0)
-figure_cards_allowed = null
-number_cards_allowed = null
-spanish_suits_allowed = null
-french_suits_allowed = null
 
 [node name="EmptyPileTexture" type="TextureRect" parent="."]
 custom_minimum_size = Vector2(37, 52)
@@ -38,7 +32,8 @@ expand_mode = 1
 collision_layer = 128
 collision_mask = 0
 monitoring = false
-priority = 2
+priority = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CardDetectionArea"]
 shape = SubResource("RectangleShape2D_4d82l")
+debug_color = Color(0, 0.6, 0.231373, 0.419608)

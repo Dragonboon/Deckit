@@ -55,6 +55,7 @@ enum Orientation {
 ## The default orientation of this card when added to the table
 @export var default_orientation:  DeckitPlayingCard.Orientation = DeckitPlayingCard.Orientation.FaceUp
 
+
 func default_orientation_is_face_up() -> bool:
 	return default_orientation == DeckitPlayingCard.Orientation.FaceUp
 
@@ -81,7 +82,7 @@ func is_joker() -> bool:
 	
 	
 func is_ace() -> bool:
-	return value == 1 and not is_joker()
+	return value == 1
 	
 	
 func is_number() -> bool:

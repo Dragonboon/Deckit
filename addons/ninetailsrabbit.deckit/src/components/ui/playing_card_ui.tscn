@@ -24,13 +24,17 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Draggable2D" type="Button" parent="CardTexture" node_paths=PackedStringArray("draggable")]
+unique_name_in_owner = true
 layout_mode = 1
 offset_right = 8.0
 offset_bottom = 8.0
 script = ExtResource("4_2yupj")
 draggable = NodePath("../..")
+reset_position_on_release = false
 
 [node name="CardArea" type="Area2D" parent="."]
+unique_name_in_owner = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CardArea"]
 shape = SubResource("RectangleShape2D_k3edh")
+debug_color = Color(0.776471, 0.356863, 0.368627, 0.419608)

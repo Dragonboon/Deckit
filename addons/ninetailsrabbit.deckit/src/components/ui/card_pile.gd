@@ -67,6 +67,8 @@ enum StackMode {
 @export var max_rotation_on_card_dropped: float = 5.0
 
 @export_category("Rules")
+## When enabled the last card can be moved from the pile
+@export var top_card_can_be_dragged: bool = false
 ## Set to zero to allow an infinite amount of cards
 @export var maximum_cards_in_pile: int = 0
 @export var figure_cards_allowed: bool = true
@@ -110,7 +112,8 @@ func change_detection_area_size(new_size: Vector2) -> void:
 func change_empty_texture_size(new_size: Vector2) -> void:
 	DeckitUtils.center_pivot(empty_pile_texture_rect)
 	
-	empty_pile_texture_rect.mouse_filter = Control.MOUSE_FILTER_PASS
+	empty_pile_texture_rect.z_index = 0
+	empty_pile_texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	empty_pile_texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	empty_pile_texture_rect.custom_minimum_size = new_size
 	empty_pile_texture_rect.set_deferred("size", empty_pile_texture_rect.custom_minimum_size)
@@ -132,9 +135,11 @@ func card_can_be_added_to_pile(playing_card: DeckitPlayingCardUI) -> bool:
 	
 func add_card(card: DeckitPlayingCardUI) -> void:
 	if card_can_be_added_to_pile(card):
-		card.lock()
 		current_cards.append(card)
 		added_card.emit(card)
+		
+		if not card.draggable_2d.dragged.is_connected(on_top_card_dragged.bind(card)):
+			card.draggable_2d.dragged.connect(on_top_card_dragged.bind(card))
 	else:
 		add_card_request_denied.emit(card)
 
@@ -148,8 +153,12 @@ func remove_card(card: DeckitPlayingCardUI) -> void:
 	if has_card(card):
 		current_cards.erase(card)
 		removed_card.emit(card)
+		update_card_locks()
 		
+		if card.draggable_2d.dragged.is_connected(on_top_card_dragged.bind(card)):
+			card.draggable_2d.dragged.disconnect(on_top_card_dragged.bind(card))
 		
+
 func remove_cards(cards: Array[DeckitPlayingCardUI] = current_cards) -> void:
 	for card: DeckitPlayingCardUI in cards:
 		remove_card(card)
@@ -173,6 +182,21 @@ func remove_random_card() -> DeckitPlayingCardUI:
 	
 	return card
 	
+	
+func update_card_locks() -> void:
+	if current_cards.is_empty():
+		return
+		
+	for index in current_cards.size():
+		var card: DeckitPlayingCardUI = current_cards[index]
+		
+		get_parent().move_child(card, index + 1)
+		
+		if index == current_cards.size() - 1 and top_card_can_be_dragged:
+			card.unlock()
+		else:
+			card.lock()
+			
 
 func clear() -> void:
 	if is_empty():
@@ -289,9 +313,15 @@ func on_added_card(new_card: DeckitPlayingCardUI) -> void:
 		filled.emit()
 		
 	adjust_card_to_stack(new_card)
+	update_card_locks()
 	
 
 func on_removed_card(_removed_card: DeckitPlayingCardUI) -> void:
 	adjust_cards_to_stack()
+	update_card_locks()
+
+
+func on_top_card_dragged(card: DeckitPlayingCardUI) -> void:
+	remove_card(card)
 
 #endregion
