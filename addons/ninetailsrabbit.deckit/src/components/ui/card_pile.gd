@@ -8,6 +8,7 @@ signal added_card(card: DeckitPlayingCardUI)
 signal removed_card(card: DeckitPlayingCardUI)
 signal removed_cards(cards: Array[DeckitPlayingCardUI])
 signal add_card_request_denied(card: DeckitPlayingCardUI)
+signal add_cards_request_denied(card: Array[DeckitPlayingCardUI])
 signal emptied(cards: Array[DeckitPlayingCardUI])
 signal filled
 
@@ -124,6 +125,9 @@ func change_empty_texture_size(new_size: Vector2) -> void:
 
 #region Features
 func card_can_be_added_to_pile(playing_card: DeckitPlayingCardUI) -> bool:
+	if has_card(playing_card):
+		return false
+		
 	var is_allowed_spanish_card: bool = playing_card.card.is_spanish() and playing_card.card.suit in spanish_suits_allowed
 	var is_allowed_french_card: bool = playing_card.card.is_french() and playing_card.card.suit in french_suits_allowed
 	var is_allowed_figure_card: bool = playing_card.card.is_figure() and figure_cards_allowed
@@ -145,8 +149,11 @@ func add_card(card: DeckitPlayingCardUI) -> void:
 
 
 func add_cards(cards: Array[DeckitPlayingCardUI]) -> void:
-	for card: DeckitPlayingCardUI in cards:
-		add_card(card)
+	if is_full():
+		add_cards_request_denied.emit(cards)
+	else:
+		for card: DeckitPlayingCardUI in cards:
+			add_card(card)
 
 
 func remove_card(card: DeckitPlayingCardUI) -> void:
@@ -208,6 +215,10 @@ func clear() -> void:
 #endregion
 
 #region Accessors
+func has_card(card: DeckitPlayingCardUI) -> bool:
+	return current_cards.has(card)
+	
+	
 func bottom_card() -> DeckitPlayingCardUI:
 	if is_empty():
 		return null
@@ -238,12 +249,15 @@ func card_at_position(idx: int) -> DeckitPlayingCardUI:
 	return null
 
 
-func has_card(card: DeckitPlayingCardUI) -> bool:
-	return current_cards.has(card)
-
-
 func is_empty() -> bool:
 	return current_cards.is_empty()
+
+
+func is_full() -> bool:
+	if maximum_cards_in_pile == 0:
+		return true
+		
+	return current_cards.size() == maximum_cards_in_pile
 
 
 func total_card_value() -> float:
@@ -309,7 +323,7 @@ func adjust_card_to_stack(new_card: DeckitPlayingCardUI) -> void:
 
 #region Signal callbacks
 func on_added_card(new_card: DeckitPlayingCardUI) -> void:
-	if current_cards.size() == maximum_cards_in_pile:
+	if is_full():
 		filled.emit()
 		
 	adjust_card_to_stack(new_card)

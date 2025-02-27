@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://dkv01xl0df4g5"]
+[gd_scene load_steps=15 format=3 uid="uid://dkv01xl0df4g5"]
 
 [ext_resource type="PackedScene" uid="uid://dypmo68q4swhg" path="res://addons/ninetailsrabbit.deckit/src/components/ui/playing_card_ui.tscn" id="1_gpf0u"]
 [ext_resource type="Script" path="res://test_scene.gd" id="1_nlxlq"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://c5t5udmax5nfo" path="res://addons/ninetailsrabbit.deckit/src/components/ui/card_pile.tscn" id="5_appcp"]
 [ext_resource type="Texture2D" uid="uid://fg74t7qhibax" path="res://addons/ninetailsrabbit.deckit/assets/Spades_10.png" id="5_bj8q2"]
 [ext_resource type="Texture2D" uid="uid://bxnppv5bq6461" path="res://addons/ninetailsrabbit.deckit/assets/Diamonds_8.png" id="5_s1m7a"]
+[ext_resource type="Script" path="res://addons/ninetailsrabbit.deckit/src/components/ui/card_hand.gd" id="10_0xgaa"]
 
 [sub_resource type="Resource" id="Resource_nfqr2"]
 script = ExtResource("4_b2i23")
@@ -131,3 +132,11 @@ empty_pile_texture = ExtResource("2_0xilr")
 stack_mode = 2
 stack_separation = Vector2(3, 3)
 top_card_can_be_dragged = true
+
+[node name="CardHand" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 218.0
+offset_top = 222.0
+offset_right = 258.0
+offset_bottom = 262.0
+script = ExtResource("10_0xgaa")
