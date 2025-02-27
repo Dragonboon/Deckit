@@ -81,7 +81,7 @@ func _enter_tree() -> void:
 	
 
 func _ready() -> void:
-	card.z_as_relative = false
+	z_as_relative = false
 
 	_prepare_card_texture()
 	_prepare_shadow()
@@ -226,7 +226,7 @@ func on_drag_released() -> void:
 		detected_pile.add_card(self)
 		detected_pile = null
 		draggable_2d.release_focus()
-
+	
 
 func on_drag_unlocked() -> void:
 	if not is_locked:

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dj6am6ljfomyb"
-path="res://.godot/imported/player_hand.svg-f7159c9c05421c675659521706ba6c94.ctex"
+uid="uid://guhah5g3mqtv"
+path="res://.godot/imported/Clubs_1.png-b3262d3448d77b75a70d9f6d7bbf1133.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/ninetailsrabbit.deckit/assets/player_hand.svg"
-dest_files=["res://.godot/imported/player_hand.svg-f7159c9c05421c675659521706ba6c94.ctex"]
+source_file="res://addons/ninetailsrabbit.deckit/src/components/ui/Clubs_1.png"
+dest_files=["res://.godot/imported/Clubs_1.png-b3262d3448d77b75a70d9f6d7bbf1133.ctex"]
 
 [params]
 
@@ -32,6 +32,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

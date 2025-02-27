@@ -79,7 +79,6 @@ func _process(delta: float) -> void:
 		current_position = draggable.global_position + m_offset
 		
 		if screen_limit:
-			
 			draggable.global_position = Vector2(
 				clampf(draggable.global_position.x, 0 ,get_viewport_rect().size.x), 
 				clampf(draggable.global_position.y, 0 ,get_viewport_rect().size.y)
