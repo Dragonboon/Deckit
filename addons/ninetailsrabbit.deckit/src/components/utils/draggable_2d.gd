@@ -56,6 +56,8 @@ var is_dragging: bool = false:
 			set_process(is_dragging and not is_locked)
 
 
+var is_drag_disabled: bool = false
+
 var original_z_index: int = 0
 var original_position: Vector2 = Vector2.ZERO
 var original_rotation: float = 0.0
@@ -72,7 +74,7 @@ var current_angle_x_max: float
 
 
 func _process(delta: float) -> void:
-	if not is_locked and is_dragging:
+	if not is_locked and is_dragging and not is_drag_disabled:
 		last_mouse_position = draggable.global_position
 		
 		draggable.global_position = draggable.global_position.lerp(get_global_mouse_position(), smooth_lerp_factor * delta) if smooth_lerp_factor > 0 else get_global_mouse_position()
@@ -123,6 +125,14 @@ func unlock() -> void:
 	is_locked = false
 	disabled = false
 	show()
+
+
+func enable_drag() -> void:
+	is_drag_disabled = false
+
+
+func disable_drag() -> void:
+	is_drag_disabled = true
 
 
 func rotate_velocity(delta: float) -> void:

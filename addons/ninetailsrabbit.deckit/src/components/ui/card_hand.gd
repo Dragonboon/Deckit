@@ -12,7 +12,7 @@ signal add_cards_request_denied(card: Array[DeckitPlayingCardUI])
 signal sorted_cards(previous: Array[DeckitPlayingCardUI], current: Array[DeckitPlayingCardUI])
 signal selected_card(card: DeckitPlayingCardUI)
 signal selected_cards(cards: Array[DeckitPlayingCardUI])
-
+signal unselected_card(card: DeckitPlayingCardUI)
 
 enum Layouts {
 	Horizontal,
@@ -53,6 +53,11 @@ enum SelectionMode {
 @export var maximum_cards: int = 4:
 	set(value):
 		maximum_cards = maxi(1, value)
+## Set to 0 to allow select all the cards
+@export var maximum_selected_cards: int = 4:
+	set(value):
+		maximum_selected_cards = maxi(0, value)
+
 @export var display_layout_mode: Layouts = Layouts.Horizontal:
 	set(value):
 		if display_layout_mode != value:
@@ -127,6 +132,8 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	draw_preview_cards()
+	
+	added_card.connect(on_added_card)
 
 
 func update_hand_display_layout() -> void:
@@ -407,21 +414,29 @@ func on_added_card(card: DeckitPlayingCardUI) -> void:
 			card.draggable_2d.dragged.connect(on_card_dragged.bind(card))
 	
 	elif selection_mode_is_click():
+		card.draggable_2d.disable_drag()
+		
 		if not card.draggable_2d.pressed.is_connected(on_card_pressed.bind(card)):
 			card.draggable_2d.pressed.connect(on_card_pressed.bind(card))
 	
 
 func on_card_dragged(card: DeckitPlayingCardUI) -> void:
 	remove_card(card)
-	update_hand_display_layout()
+	call_deferred("update_hand_display_layout")
 	
 
 func on_card_pressed(card: DeckitPlayingCardUI) -> void:
-	if current_selected_cards.has(card):
-		current_selected_cards.erase(card)
-	else:
-		current_selected_cards.append(card)
-		
-	print("pressed card ", card)
-	
+		if current_selected_cards.has(card):
+			current_selected_cards.erase(card)
+			card.z_index = current_cards.size()
+			
+			unselected_card.emit(card)
+		else:
+			if maximum_selected_cards == 0 or current_selected_cards.size() < maximum_selected_cards:
+				current_selected_cards.append(card)
+				card.z_index = current_cards.size() + current_selected_cards.size() + 100
+				
+				selected_card.emit(card)
+				selected_cards.emit(current_selected_cards)
+
 #endregion
