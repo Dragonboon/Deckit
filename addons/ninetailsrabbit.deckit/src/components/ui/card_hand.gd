@@ -139,6 +139,7 @@ func update_hand_display_layout() -> void:
 			update_irregular_fan_layout()
 		Layouts.PerfectArcFan:
 			update_perfect_arc_fan_preview_layout()
+			update_perfect_arc_fan_layout()
 			
 
 func has_card(card: DeckitPlayingCardUI) -> bool:
@@ -263,6 +264,39 @@ func calculate_irregular_fan_layout_rotation(card: DeckitPlayingCardUI) -> float
 		
 	return 0.0
 
+
+func update_perfect_arc_fan_layout() -> void:
+	var cards_size: int = current_cards.size()
+	var card_spread = min(perfect_arc_angle_limit / cards_size, perfect_arc_max_card_spread_angle)
+	var current_angle = -(card_spread * (cards_size - 1)) / 2 - 90
+
+	for card: DeckitPlayingCardUI in current_cards:
+		card.position = calculate_perfect_arc_fan_position(card, current_angle)
+		card.rotation = calculate_perfect_arc_fan_rotation(card, current_angle)
+		current_angle += card_spread
+
+
+func calculate_perfect_arc_fan_position(card: DeckitPlayingCardUI, angle: float) -> Vector2:
+	if has_card(card):
+		var final_position: Vector2 = Vector2(
+				perfect_arc_hand_radius * cos(deg_to_rad(angle)), 
+				perfect_arc_hand_radius * sin(deg_to_rad(angle)
+			))
+		
+		## This sum keeps the player hand control node in the same place
+		final_position.y += perfect_arc_hand_radius
+		
+		return final_position
+		
+	return Vector2.ZERO
+	
+	
+func calculate_perfect_arc_fan_rotation(card: DeckitPlayingCardUI, angle: float) -> float:
+	if has_card(card):
+		return deg_to_rad(angle + 90.0)
+			
+	return 0.0
+	
 #endregion
 
 
