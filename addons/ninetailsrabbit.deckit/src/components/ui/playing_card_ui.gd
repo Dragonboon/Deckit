@@ -77,7 +77,8 @@ var detected_pile: CardPile
 
 
 func _enter_tree() -> void:
-	add_to_group(GroupName)
+	if not is_in_group(GroupName):
+		add_to_group(GroupName)
 	
 
 func _ready() -> void:
@@ -151,25 +152,29 @@ func is_display_shadow_never() -> bool:
 
 
 func _prepare_card_texture() -> void:
+	card.texture_size =  card.front_texture.get_size() if card.texture_size.is_zero_approx() else card.texture_size
+	
 	card_texture.texture = card.front_texture
 	card_texture.mouse_filter = Control.MOUSE_FILTER_PASS
 	card_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	card_texture.custom_minimum_size = card.front_texture.get_size() if card.texture_size.is_zero_approx() else card.texture_size
-	card_texture.set_deferred("size", card_texture.custom_minimum_size)
+	card_texture.custom_minimum_size = card.texture_size
+	card_texture.set_deferred("size", card.texture_size)
 	card_texture.position = Vector2.ZERO
 
 
 func _prepare_shadow() -> void:
+	var shadow_texture_size: Vector2 =  card.front_texture.get_size() if card.texture_size.is_zero_approx() else card.texture_size
+	
 	shadow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	shadow.custom_minimum_size = card.front_texture.get_size() if card.texture_size.is_zero_approx() else card.texture_size
-	shadow.set_deferred("size", shadow.custom_minimum_size)
+	shadow.custom_minimum_size = shadow_texture_size
+	shadow.set_deferred("size", shadow_texture_size)
 	shadow.texture = card_texture.texture
 	shadow.scale = card_texture.scale
 	shadow.show_behind_parent = true
 	shadow.self_modulate = shadow_color
-	shadow.position = Vector2.ZERO
 	
+	shadow.position = Vector2.ZERO
 	shadow.position.x = card_texture.position.x + shadow_horizontal_depth
 	shadow.position.y = card_texture.position.y + shadow_vertical_depth
 	

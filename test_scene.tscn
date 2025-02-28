@@ -96,31 +96,31 @@ mouse_filter = 2
 color = Color(3.60981e-07, 0.296768, 0.22019, 1)
 
 [node name="DeckitPlayingCardUI" parent="." instance=ExtResource("1_gpf0u")]
-offset_left = 71.0
-offset_top = 83.0
-offset_right = 71.0
-offset_bottom = 83.0
+offset_left = 94.0
+offset_top = 57.0
+offset_right = 94.0
+offset_bottom = 57.0
 card = SubResource("Resource_nfqr2")
 
 [node name="DeckitPlayingCardUI2" parent="." instance=ExtResource("1_gpf0u")]
-offset_left = 77.0
-offset_top = 122.0
-offset_right = 77.0
-offset_bottom = 122.0
+offset_left = 95.0
+offset_top = 98.0
+offset_right = 95.0
+offset_bottom = 98.0
 card = SubResource("Resource_h3d1w")
 
 [node name="DeckitPlayingCardUI3" parent="." instance=ExtResource("1_gpf0u")]
-offset_left = 90.0
-offset_top = 173.0
-offset_right = 90.0
-offset_bottom = 173.0
+offset_left = 93.0
+offset_top = 147.0
+offset_right = 93.0
+offset_bottom = 147.0
 card = SubResource("Resource_2t17x")
 
 [node name="DeckitPlayingCardUI4" parent="." instance=ExtResource("1_gpf0u")]
-offset_left = 143.0
-offset_top = 148.0
-offset_right = 143.0
-offset_bottom = 148.0
+offset_left = 95.0
+offset_top = 193.0
+offset_right = 95.0
+offset_bottom = 193.0
 card = SubResource("Resource_a01kh")
 
 [node name="CardPile" parent="." instance=ExtResource("5_appcp")]
@@ -143,13 +143,15 @@ offset_bottom = 258.0
 mouse_filter = 1
 script = ExtResource("10_0xgaa")
 preview_display_texture = ExtResource("5_s1m7a")
+display_layout_mode = 1
 horizontal_separation = Vector2(30, 0)
 
 [node name="@TextureRect@72554" type="TextureRect" parent="CardHand"]
 layout_mode = 0
-offset_left = 30.0
-offset_right = 67.0
+offset_left = -38.5
+offset_right = -1.5
 offset_bottom = 52.0
+rotation = -9.71239
 pivot_offset = Vector2(19, 26)
 mouse_filter = 2
 texture = ExtResource("5_s1m7a")
@@ -157,9 +159,10 @@ expand_mode = 1
 
 [node name="@TextureRect@72555" type="TextureRect" parent="CardHand"]
 layout_mode = 0
-offset_left = 60.0
-offset_right = 97.0
+offset_left = -18.5
+offset_right = 18.5
 offset_bottom = 52.0
+rotation = -9.42478
 pivot_offset = Vector2(19, 26)
 mouse_filter = 2
 texture = ExtResource("5_s1m7a")
@@ -167,9 +170,10 @@ expand_mode = 1
 
 [node name="@TextureRect@72556" type="TextureRect" parent="CardHand"]
 layout_mode = 0
-offset_left = 90.0
-offset_right = 127.0
+offset_left = 1.5
+offset_right = 38.5
 offset_bottom = 52.0
+rotation = -9.13717
 pivot_offset = Vector2(19, 26)
 mouse_filter = 2
 texture = ExtResource("5_s1m7a")
@@ -177,9 +181,10 @@ expand_mode = 1
 
 [node name="@TextureRect@72557" type="TextureRect" parent="CardHand"]
 layout_mode = 0
-offset_left = 120.0
-offset_right = 157.0
+offset_left = 21.5
+offset_right = 58.5
 offset_bottom = 52.0
+rotation = -8.84956
 pivot_offset = Vector2(19, 26)
 mouse_filter = 2
 texture = ExtResource("5_s1m7a")

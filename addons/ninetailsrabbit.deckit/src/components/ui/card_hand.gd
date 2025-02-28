@@ -133,8 +133,10 @@ func update_hand_display_layout() -> void:
 	match display_layout_mode:
 		Layouts.Horizontal:
 			update_horizontal_preview_layout()
+			update_horizontal_layout()
 		Layouts.IrregularFan:
 			update_irregular_fan_preview_layout()
+			update_irregular_fan_layout()
 		Layouts.PerfectArcFan:
 			update_perfect_arc_fan_preview_layout()
 			
@@ -144,12 +146,18 @@ func has_card(card: DeckitPlayingCardUI) -> bool:
 
 
 func add_card(card: DeckitPlayingCardUI) -> void:
-	if not card_can_be_added_to_hand(card):
-		add_card_request_denied.emit(card)
-	else:
+	if card_can_be_added_to_hand(card):
 		current_cards.append(card)
+		card.reparent(self, false)
+		card.position = Vector2.ZERO
+		card.z_as_relative = true
+		card.z_index = current_cards.size() + 1
+		call_deferred("update_hand_display_layout")
+		
 		added_card.emit(card)
-
+	else:
+		add_card_request_denied.emit(card)
+		
 
 func remove_card(card: DeckitPlayingCardUI):
 	if has_card(card):
@@ -158,13 +166,26 @@ func remove_card(card: DeckitPlayingCardUI):
 			
 		#if card.draggable_2d.released.is_connected(on_card_released.bind(card)):
 			#card.draggable_2d.released.disconnect(on_card_released.bind(card))
+			
+		card.z_as_relative = false
+		call_deferred("update_hand_display_layout")
 		
 		current_cards.erase(card)
 		removed_card.emit(card)
 		
 
+func remove_random_card() -> DeckitPlayingCardUI:
+	if current_cards.is_empty():
+		return null
+		
+	var card: DeckitPlayingCardUI = current_cards.pick_random()
+	remove_card(card)
+	
+	return card
+
+
 func card_can_be_added_to_hand(card: DeckitPlayingCardUI) -> bool:
-	return current_cards.size() == maximum_cards or has_card(card)
+	return (maximum_cards == 0 or current_cards.size() < maximum_cards) and not has_card(card)
 
 
 func selection_mode_is_click() -> bool:
@@ -175,7 +196,76 @@ func selection_mode_is_drag() -> bool:
 	return selection_mode == SelectionMode.Drag
 	
 
+#region Layouts
+func update_horizontal_layout() -> void:
+	if current_cards.is_empty():
+		return
+		
+	for card: DeckitPlayingCardUI in current_cards:
+		card.position = Vector2.ZERO
+		card.position += calculate_card_horizontal_layout_position(card)
+		card.rotation = calculate_card_horizontal_layout_rotation(card)
+		
+		
+func calculate_card_horizontal_layout_position(card: DeckitPlayingCardUI) -> Vector2:
+	if has_card(card):
+		var index: int = current_cards.find(card)
+		return card.position + (horizontal_direction * horizontal_separation) * index
+		
+	return Vector2.ZERO
+
+
+func calculate_card_horizontal_layout_rotation(card: DeckitPlayingCardUI) -> float:
+	if has_card(card):
+		var min_rotation_angle: float = deg_to_rad(horizontal_min_rotation_angle)
+		var max_rotation_angle: float = deg_to_rad(horizontal_max_rotation_angle)
+		
+		return randf_range(min_rotation_angle, max_rotation_angle)
 	
+	return 0.0
+	
+
+func update_irregular_fan_layout() -> void:
+	var cards_size: int = current_cards.size()
+	
+	for card: DeckitPlayingCardUI in current_cards:
+		card.position = calculate_irregular_fan_layout_position(card)
+		card.rotation = calculate_irregular_fan_layout_rotation(card)
+
+
+func calculate_irregular_fan_layout_position(card: DeckitPlayingCardUI) -> Vector2:
+	if has_card(card):
+		var index: int = current_cards.find(card)
+		var cards_size: int = current_cards.size()
+		
+		var final_position: Vector2 = -( 
+			(card.card.texture_size * card.card_texture.scale) / 2.0) - Vector2(irregular_fan_card_offset_x * (cards_size - index),
+			 0
+			)
+			
+		final_position.x += (irregular_fan_card_offset_x * cards_size) / 2.0
+		final_position.y = 0
+		
+		return final_position
+	
+	return Vector2.ZERO
+
+
+func calculate_irregular_fan_layout_rotation(card: DeckitPlayingCardUI) -> float:
+	if has_card(card):
+		var index: int = current_cards.find(card)
+		
+		return lerp_angle(
+			-irregular_fan_max_rotation, 
+			irregular_fan_max_rotation, 
+			float(index) / float(current_cards.size())
+			)
+		
+	return 0.0
+
+#endregion
+
+
 #region Debug
 func draw_preview_cards() -> void:
 	if Engine.is_editor_hint() and is_inside_tree():
@@ -264,6 +354,7 @@ func on_added_card(card: DeckitPlayingCardUI) -> void:
 
 func on_card_dragged(card: DeckitPlayingCardUI) -> void:
 	remove_card(card)
+	update_hand_display_layout()
 	
 
 func on_card_pressed(card: DeckitPlayingCardUI) -> void:
