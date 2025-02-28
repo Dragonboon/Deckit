@@ -276,8 +276,9 @@ func update_horizontal_layout() -> void:
 		card.position = Vector2.ZERO
 		card.position += calculate_card_horizontal_layout_position(card)
 		card.rotation = calculate_card_horizontal_layout_rotation(card)
-		
-		
+		hand_cards_position.get_or_add(card, {"position": card.position, "rotation": card.rotation})
+
+
 func calculate_card_horizontal_layout_position(card: DeckitPlayingCardUI) -> Vector2:
 	if has_card(card):
 		var index: int = current_cards.find(card)
@@ -302,6 +303,7 @@ func update_irregular_fan_layout() -> void:
 	for card: DeckitPlayingCardUI in current_cards:
 		card.position = calculate_irregular_fan_layout_position(card)
 		card.rotation = calculate_irregular_fan_layout_rotation(card)
+		hand_cards_position.get_or_add(card, {"position": card.position, "rotation": card.rotation})
 
 
 func calculate_irregular_fan_layout_position(card: DeckitPlayingCardUI) -> Vector2:
@@ -344,6 +346,7 @@ func update_perfect_arc_fan_layout() -> void:
 		card.position = calculate_perfect_arc_fan_position(card, current_angle)
 		card.rotation = calculate_perfect_arc_fan_rotation(card, current_angle)
 		current_angle += card_spread
+		hand_cards_position.get_or_add(card, {"position": card.position, "rotation": card.rotation})
 
 
 func calculate_perfect_arc_fan_position(card: DeckitPlayingCardUI, angle: float) -> Vector2:
@@ -447,8 +450,6 @@ func update_perfect_arc_fan_preview_layout() -> void:
 
 #region Signal callbacks
 func on_added_card(card: DeckitPlayingCardUI) -> void:
-	hand_cards_position.get_or_add(card, {"position": card.position, "rotation": card.rotation})
-	
 	if selection_mode_is_drag():
 		if not card.draggable_2d.dragged.is_connected(on_card_dragged.bind(card)):
 			card.draggable_2d.dragged.connect(on_card_dragged.bind(card))
