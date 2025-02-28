@@ -123,7 +123,8 @@ enum SelectionMode {
 
 var current_cards: Array[DeckitPlayingCardUI] = []
 var current_selected_cards: Array[DeckitPlayingCardUI] = []
-
+## Dictionary[DeckitPlayingCardUI, {"position", "rotation"}
+var hand_cards_position: Dictionary = {}
 
 func _enter_tree() -> void:
 	add_to_group(GroupName)
@@ -166,15 +167,46 @@ func add_card(card: DeckitPlayingCardUI) -> void:
 		added_card.emit(card)
 	else:
 		add_card_request_denied.emit(card)
+
+
+func add_card_to_selected(card: DeckitPlayingCardUI) -> bool:
+	if current_cards.has(card) \
+		and not current_selected_cards.has(card) \
+			and maximum_selected_cards == 0 or current_selected_cards.size() < maximum_selected_cards:
+		current_selected_cards.append(card)
+		card.set_deferred("z_index", current_cards.size() + current_selected_cards.size() + 1)
 		
+		selected_card.emit(card)
+		selected_cards.emit(current_selected_cards)
+		
+		return true
+		
+	return false
+
+
+func remove_selected_card(card: DeckitPlayingCardUI) -> bool:
+	if current_selected_cards.has(card):
+		current_selected_cards.erase(card)
+		card.set_deferred("z_index", current_cards.size())
+		
+		if maximum_cards > 0 and current_selected_cards.size() == maximum_selected_cards:
+			for unselected_card: DeckitPlayingCardUI in unselected_cards():
+				unselected_card.lock()
+				
+		unselected_card.emit(card)
+		
+		return true
+		
+	return false
+
 
 func remove_card(card: DeckitPlayingCardUI):
 	if has_card(card):
 		if card.draggable_2d.dragged.is_connected(on_card_dragged.bind(card)):
 			card.draggable_2d.dragged.disconnect(on_card_dragged.bind(card))
 			
-		#if card.draggable_2d.released.is_connected(on_card_released.bind(card)):
-			#card.draggable_2d.released.disconnect(on_card_released.bind(card))
+		if card.draggable_2d.released.is_connected(on_card_released.bind(card)):
+			card.draggable_2d.released.disconnect(on_card_released.bind(card))
 			
 		card.z_as_relative = false
 		call_deferred("update_hand_display_layout")
@@ -195,6 +227,12 @@ func remove_random_card() -> DeckitPlayingCardUI:
 
 func card_can_be_added_to_hand(card: DeckitPlayingCardUI) -> bool:
 	return (maximum_cards == 0 or current_cards.size() < maximum_cards) and not has_card(card)
+
+
+func unselected_cards() -> Array[DeckitPlayingCardUI]:
+	return current_cards.filter(
+		func(card: DeckitPlayingCardUI): return not current_selected_cards.has(card)
+		)
 
 
 func sort_cards_by_value_asc() -> void:
@@ -234,7 +272,7 @@ func update_horizontal_layout() -> void:
 	if current_cards.is_empty():
 		return
 		
-	for card: DeckitPlayingCardUI in current_cards:
+	for card: DeckitPlayingCardUI in unselected_cards():
 		card.position = Vector2.ZERO
 		card.position += calculate_card_horizontal_layout_position(card)
 		card.rotation = calculate_card_horizontal_layout_rotation(card)
@@ -409,10 +447,15 @@ func update_perfect_arc_fan_preview_layout() -> void:
 
 #region Signal callbacks
 func on_added_card(card: DeckitPlayingCardUI) -> void:
+	hand_cards_position.get_or_add(card, {"position": card.position, "rotation": card.rotation})
+	
 	if selection_mode_is_drag():
 		if not card.draggable_2d.dragged.is_connected(on_card_dragged.bind(card)):
 			card.draggable_2d.dragged.connect(on_card_dragged.bind(card))
-	
+		
+		if not card.draggable_2d.released.is_connected(on_card_released.bind(card)):
+			card.draggable_2d.released.connect(on_card_released.bind(card))
+			
 	elif selection_mode_is_click():
 		card.draggable_2d.disable_drag()
 		
@@ -421,22 +464,19 @@ func on_added_card(card: DeckitPlayingCardUI) -> void:
 	
 
 func on_card_dragged(card: DeckitPlayingCardUI) -> void:
-	remove_card(card)
-	call_deferred("update_hand_display_layout")
+	if selection_mode_is_drag():
+		add_card_to_selected(card)
+		call_deferred("update_hand_display_layout")
+		
 	
+func on_card_released(card: DeckitPlayingCardUI) -> void:
+	pass
+	#if not card.is_locked:
+		#add_card(card)
+
 
 func on_card_pressed(card: DeckitPlayingCardUI) -> void:
-		if current_selected_cards.has(card):
-			current_selected_cards.erase(card)
-			card.z_index = current_cards.size()
-			
-			unselected_card.emit(card)
-		else:
-			if maximum_selected_cards == 0 or current_selected_cards.size() < maximum_selected_cards:
-				current_selected_cards.append(card)
-				card.z_index = current_cards.size() + current_selected_cards.size() + 100
-				
-				selected_card.emit(card)
-				selected_cards.emit(current_selected_cards)
-
+	if selection_mode_is_click():
+		if not remove_selected_card(card):
+			add_card_to_selected(card)
 #endregion
