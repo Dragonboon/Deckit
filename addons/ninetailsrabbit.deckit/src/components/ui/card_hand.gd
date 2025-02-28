@@ -142,6 +142,7 @@ func update_hand_display_layout() -> void:
 			update_perfect_arc_fan_layout()
 			
 
+#region Cards
 func has_card(card: DeckitPlayingCardUI) -> bool:
 	return current_cards.has(card)
 
@@ -189,6 +190,28 @@ func card_can_be_added_to_hand(card: DeckitPlayingCardUI) -> bool:
 	return (maximum_cards == 0 or current_cards.size() < maximum_cards) and not has_card(card)
 
 
+func sort_cards_by_value_asc() -> void:
+	if current_cards.size() > 1:
+		var previous_sortered_cards: Array[DeckitPlayingCardUI] = current_cards.duplicate()
+		
+		current_cards.sort_custom(
+			func(a: DeckitPlayingCardUI, b: DeckitPlayingCardUI): return a.value < b.value
+			)
+		
+		update_hand_display_layout()
+		sorted_cards.emit(previous_sortered_cards, current_cards)
+		
+		
+func sort_cards_by_value_desc() -> void:
+	if current_cards.size() > 1:
+		var previous_sortered_cards: Array[DeckitPlayingCardUI] = current_cards.duplicate()
+		
+		current_cards.sort_custom(func(a: DeckitPlayingCardUI, b: DeckitPlayingCardUI): return a.value > b.value)
+		update_hand_display_layout()
+		
+		sorted_cards.emit(previous_sortered_cards, current_cards)
+
+
 func selection_mode_is_click() -> bool:
 	return selection_mode == SelectionMode.Click
 	
@@ -196,6 +219,8 @@ func selection_mode_is_click() -> bool:
 func selection_mode_is_drag() -> bool:
 	return selection_mode == SelectionMode.Drag
 	
+	
+#endregion
 
 #region Layouts
 func update_horizontal_layout() -> void:
