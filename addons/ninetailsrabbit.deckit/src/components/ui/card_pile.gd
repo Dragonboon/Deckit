@@ -54,7 +54,7 @@ enum StackMode {
 @export var stack_direction: Vector2 = Vector2.ONE:
 	set(new_direction):
 		if new_direction != stack_direction:
-			stack_direction = new_direction
+			stack_direction = new_direction.normalized()
 			adjust_cards_to_stack()
 ## The amount of space between cards as the stack grows.
 @export var stack_separation: Vector2 = Vector2.ONE:

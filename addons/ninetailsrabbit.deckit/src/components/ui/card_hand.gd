@@ -1,4 +1,5 @@
 @icon("res://addons/ninetailsrabbit.deckit/assets/card_hand.svg")
+@tool
 class_name CardHand extends Control
 
 const GroupName: StringName = &"card-hands"
@@ -9,6 +10,8 @@ signal removed_card(card: DeckitPlayingCardUI)
 signal add_card_request_denied(card: DeckitPlayingCardUI)
 signal add_cards_request_denied(card: Array[DeckitPlayingCardUI])
 signal sorted_cards(previous: Array[DeckitPlayingCardUI], current: Array[DeckitPlayingCardUI])
+signal selected_card(card: DeckitPlayingCardUI)
+signal selected_cards(cards: Array[DeckitPlayingCardUI])
 
 
 enum Layouts {
@@ -22,6 +25,29 @@ enum SelectionMode {
 	Click
 }
 
+@export_category("Debug")
+@export var preview_cards_to_display: int = 4:
+	set(value):
+		if value != preview_cards_to_display:
+			preview_cards_to_display = value
+			draw_preview_cards()
+@export var preview_display_texture: Texture2D:
+	set(value):
+		if value != preview_display_texture:
+			preview_display_texture = value
+			draw_preview_cards()
+@export var preview_texture_size: Vector2 = Vector2(37, 52):
+	set(value):
+		if value != preview_texture_size:
+			preview_texture_size = value
+			draw_preview_cards()
+@export var preview_texture_scale: float = 1.0:
+	set(value):
+		if value != preview_texture_scale:
+			preview_texture_scale = value
+			draw_preview_cards()
+			
+@export_category("Display")
 @export var id: StringName
 ## Set to 0 to allow infinite amount of cards
 @export var maximum_cards: int = 4:
@@ -31,10 +57,64 @@ enum SelectionMode {
 	set(value):
 		if display_layout_mode != value:
 			display_layout_mode = value
+			update_hand_display_layout()
 			
 			#if is_inside_tree():
 				#adjust_hand_position()
 @export var selection_mode: SelectionMode = SelectionMode.Drag
+
+@export_category("Horizontal Layout")
+@export var horizontal_separation: Vector2 = Vector2(20, 0):
+	set(new_separation):
+		if horizontal_separation != new_separation:
+			horizontal_separation = new_separation
+			update_hand_display_layout()
+@export var horizontal_direction: Vector2 = Vector2.RIGHT:
+	set(new_direction):
+		if horizontal_direction != new_direction:
+			horizontal_direction = new_direction.normalized()
+			update_hand_display_layout()
+@export_range(-360.0, 360.0, 0.01, "degrees") var horizontal_min_rotation_angle: float = 0.0:
+	set(new_angle):
+		if horizontal_min_rotation_angle != new_angle:
+			horizontal_min_rotation_angle = new_angle
+			update_hand_display_layout()
+@export_range(-360.0, 360.0, 0.01, "degrees") var horizontal_max_rotation_angle: float = 0.0:
+	set(new_angle):
+		if horizontal_max_rotation_angle != new_angle:
+			horizontal_max_rotation_angle = new_angle
+			update_hand_display_layout()
+			
+@export_category("Irregular Fan Layout")
+@export var irregular_fan_card_offset_x: float = 20.0:
+	set(new_offset):
+		if irregular_fan_card_offset_x != new_offset:
+			irregular_fan_card_offset_x = new_offset
+			update_hand_display_layout()
+@export_range(0, 360.0, 0.01, "degrees") var irregular_fan_max_rotation: float = 10.0:
+	set(new_rotation):
+		if irregular_fan_max_rotation != new_rotation:
+			irregular_fan_max_rotation = new_rotation
+			update_hand_display_layout()
+			
+@export_category("Perfect Arc Fan layout")
+## The distance of the cards aligned, more the radius, more the arc range
+@export var perfect_arc_hand_radius: float = 250.0:
+	set(new_radius):
+		if perfect_arc_hand_radius != new_radius:
+			perfect_arc_hand_radius = new_radius
+			update_hand_display_layout()
+@export_range(0, 360.0, 0.01, "degrees") var perfect_arc_angle_limit: float = 45.0:
+	set(new_angle_limit):
+		if perfect_arc_angle_limit != new_angle_limit:
+			perfect_arc_angle_limit = new_angle_limit
+			update_hand_display_layout()
+@export_range(0, 360.0, 0.01, "degrees")var perfect_arc_max_card_spread_angle: float = 15.0:
+	set(new_spread_angle):
+		if perfect_arc_max_card_spread_angle != new_spread_angle:
+			perfect_arc_max_card_spread_angle = new_spread_angle
+			update_hand_display_layout()
+
 
 var current_cards: Array[DeckitPlayingCardUI] = []
 var current_selected_cards: Array[DeckitPlayingCardUI] = []
@@ -42,10 +122,23 @@ var current_selected_cards: Array[DeckitPlayingCardUI] = []
 
 func _enter_tree() -> void:
 	add_to_group(GroupName)
-	
 	mouse_filter = MOUSE_FILTER_PASS
 	
-	
+
+func _ready() -> void:
+	draw_preview_cards()
+
+
+func update_hand_display_layout() -> void:
+	match display_layout_mode:
+		Layouts.Horizontal:
+			update_horizontal_preview_layout()
+		Layouts.IrregularFan:
+			update_irregular_fan_preview_layout()
+		Layouts.PerfectArcFan:
+			update_perfect_arc_fan_preview_layout()
+			
+
 func has_card(card: DeckitPlayingCardUI) -> bool:
 	return current_cards.has(card)
 
@@ -82,6 +175,83 @@ func selection_mode_is_drag() -> bool:
 	return selection_mode == SelectionMode.Drag
 	
 
+	
+#region Debug
+func draw_preview_cards() -> void:
+	if Engine.is_editor_hint() and is_inside_tree():
+		DeckitUtils.remove_child_nodes(self)
+			
+		for index in preview_cards_to_display:
+			var preview_card = TextureRect.new()
+			preview_card.texture = preview_display_texture
+			preview_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			preview_card.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			preview_card.set_deferred("size", preview_texture_size * preview_texture_scale)
+			preview_card.set_deferred("anchors_preset", Control.PRESET_CENTER)
+			add_child(preview_card)
+			
+			DeckitUtils.set_owner_to_edited_scene_root(preview_card)
+			DeckitUtils.center_pivot(preview_card)
+		
+		update_hand_display_layout()
+	else:
+		DeckitUtils.remove_child_nodes(self)
+		
+		
+func update_horizontal_preview_layout() -> void:
+	if Engine.is_editor_hint():
+		var min_rotation_angle: float = deg_to_rad(horizontal_min_rotation_angle)
+		var max_rotation_angle: float = deg_to_rad(horizontal_max_rotation_angle)
+		var index: int = 0
+		
+		for preview_card in get_children():
+			index += 1
+			preview_card.position = Vector2.ZERO
+			preview_card.position += (horizontal_direction * horizontal_separation) * index
+			preview_card.rotation = randf_range(min_rotation_angle, max_rotation_angle)
+			
+			
+func update_irregular_fan_preview_layout() -> void:
+	if Engine.is_editor_hint():
+		var index: int = 0
+		var cards_size: int = get_child_count()
+		
+		for preview_card in get_children():
+			index += 1
+			
+			var final_position: Vector2 = -( 
+				(preview_texture_size * preview_texture_scale) / 2.0) - Vector2(irregular_fan_card_offset_x * (cards_size - index),
+				 0
+				)
+			final_position.x += (irregular_fan_card_offset_x * cards_size) / 2.0
+			final_position.y = 0
+			
+			var final_rotation: float = lerp_angle(-irregular_fan_max_rotation, irregular_fan_max_rotation, float(index) / float(cards_size))
+			
+			preview_card.position = final_position
+			preview_card.rotation = final_rotation
+
+
+func update_perfect_arc_fan_preview_layout() -> void:
+	if Engine.is_editor_hint():
+		var cards_size: int = get_child_count()
+		var card_spread = min(perfect_arc_angle_limit / cards_size, perfect_arc_max_card_spread_angle)
+		var current_angle = -(card_spread * (cards_size - 1)) / 2 - 90
+	
+		for preview_card in get_children():
+			preview_card.position = Vector2(
+				perfect_arc_hand_radius * cos(deg_to_rad(current_angle)), 
+				perfect_arc_hand_radius * sin(deg_to_rad(current_angle)
+			))
+	
+			## This sum keeps the player hand control node in the same place
+			preview_card.position.y += perfect_arc_hand_radius
+			preview_card.rotation = deg_to_rad(current_angle + 90.0)
+			current_angle += card_spread
+
+#endregion
+
+#region Signal callbacks
 func on_added_card(card: DeckitPlayingCardUI) -> void:
 	if selection_mode_is_drag():
 		if not card.draggable_2d.dragged.is_connected(on_card_dragged.bind(card)):
@@ -103,3 +273,5 @@ func on_card_pressed(card: DeckitPlayingCardUI) -> void:
 		current_selected_cards.append(card)
 		
 	print("pressed card ", card)
+	
+#endregion

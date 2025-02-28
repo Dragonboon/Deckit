@@ -25,3 +25,13 @@ static func collision_value_to_layer(value: int) -> int:
 static func center_pivot(texture_rect: TextureRect) -> void:
 	if texture_rect.texture:
 		texture_rect.pivot_offset = (texture_rect.texture.get_size() / 2).ceil()
+
+
+static func set_owner_to_edited_scene_root(node: Node) -> void:
+	if Engine.is_editor_hint() and node.get_tree():
+		node.owner = node.get_tree().edited_scene_root
+
+
+static func remove_child_nodes(node: Node) -> void:
+	for child in node.get_children():
+		child.free()
