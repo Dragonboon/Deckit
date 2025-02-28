@@ -140,6 +140,11 @@ func card_can_be_added_to_pile(playing_card: DeckitPlayingCardUI) -> bool:
 func add_card(card: DeckitPlayingCardUI) -> void:
 	if card_can_be_added_to_pile(card):
 		current_cards.append(card)
+		card.reparent(self, false)
+		card.position = Vector2.ZERO
+		card.z_as_relative = true
+		move_child(card, current_cards.size() + 1)
+		
 		added_card.emit(card)
 		
 		if not card.draggable_2d.dragged.is_connected(on_top_card_dragged.bind(card)):
@@ -158,6 +163,9 @@ func add_cards(cards: Array[DeckitPlayingCardUI]) -> void:
 
 func remove_card(card: DeckitPlayingCardUI) -> void:
 	if has_card(card):
+		card.z_as_relative = false
+		card.reparent(get_tree().current_scene)
+		
 		current_cards.erase(card)
 		removed_card.emit(card)
 		update_card_locks()
@@ -196,8 +204,6 @@ func update_card_locks() -> void:
 		
 	for index in current_cards.size():
 		var card: DeckitPlayingCardUI = current_cards[index]
-		
-		get_parent().move_child(card, index + 1)
 		
 		if index == current_cards.size() - 1 and top_card_can_be_dragged:
 			card.unlock()
@@ -297,8 +303,7 @@ func adjust_cards_to_stack() -> void:
 func adjust_card_to_stack(new_card: DeckitPlayingCardUI) -> void:
 	var index: int = current_cards.find(new_card)
 	
-	new_card.position = position
-	new_card.set_deferred("z_index", index + 1)
+	new_card.position = Vector2.ZERO
 	
 	match stack_mode:
 		StackMode.InPlaceFaceUp:

@@ -228,9 +228,9 @@ func on_drag_released() -> void:
 		shadow.hide()
 	
 	if detected_pile and detected_pile.card_can_be_added_to_pile(self):
+		draggable_2d.release_focus()
 		detected_pile.add_card(self)
 		detected_pile = null
-		draggable_2d.release_focus()
 	
 
 func on_drag_unlocked() -> void:

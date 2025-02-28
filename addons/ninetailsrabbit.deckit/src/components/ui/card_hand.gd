@@ -158,7 +158,7 @@ func has_card(card: DeckitPlayingCardUI) -> bool:
 func add_card(card: DeckitPlayingCardUI) -> void:
 	if card_can_be_added_to_hand(card):
 		current_cards.append(card)
-		card.reparent(self, false)
+		card.reparent(self)
 		card.position = Vector2.ZERO
 		card.z_as_relative = true
 		card.z_index = current_cards.size() + 1
@@ -211,6 +211,9 @@ func remove_card(card: DeckitPlayingCardUI):
 		card.z_as_relative = false
 		call_deferred("update_hand_display_layout")
 		
+		card.reparent(get_tree().current_scene)
+		
+		hand_cards_position.erase(card)
 		current_cards.erase(card)
 		removed_card.emit(card)
 		
@@ -471,9 +474,9 @@ func on_card_dragged(card: DeckitPlayingCardUI) -> void:
 		
 	
 func on_card_released(card: DeckitPlayingCardUI) -> void:
-	pass
-	#if not card.is_locked:
-		#add_card(card)
+	if hand_cards_position.has(card):
+		card.position = hand_cards_position[card].position
+		card.rotation = hand_cards_position[card].rotation
 
 
 func on_card_pressed(card: DeckitPlayingCardUI) -> void:

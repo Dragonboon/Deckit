@@ -144,44 +144,48 @@ mouse_filter = 1
 script = ExtResource("10_0xgaa")
 preview_display_texture = ExtResource("5_s1m7a")
 maximum_selected_cards = 2
-selection_mode = 1
+display_layout_mode = 1
 horizontal_separation = Vector2(30, 0)
 
-[node name="@TextureRect@72554" type="TextureRect" parent="CardHand"]
+[node name="@TextureRect@24692" type="TextureRect" parent="CardHand"]
 layout_mode = 0
-offset_left = 30.0
-offset_right = 67.0
+offset_left = -38.5
+offset_right = -1.5
 offset_bottom = 52.0
+rotation = -9.71239
 pivot_offset = Vector2(19, 26)
 mouse_filter = 2
 texture = ExtResource("5_s1m7a")
 expand_mode = 1
 
-[node name="@TextureRect@72555" type="TextureRect" parent="CardHand"]
+[node name="@TextureRect@24693" type="TextureRect" parent="CardHand"]
 layout_mode = 0
-offset_left = 60.0
-offset_right = 97.0
+offset_left = -18.5
+offset_right = 18.5
 offset_bottom = 52.0
+rotation = -9.42478
 pivot_offset = Vector2(19, 26)
 mouse_filter = 2
 texture = ExtResource("5_s1m7a")
 expand_mode = 1
 
-[node name="@TextureRect@72556" type="TextureRect" parent="CardHand"]
+[node name="@TextureRect@24694" type="TextureRect" parent="CardHand"]
 layout_mode = 0
-offset_left = 90.0
-offset_right = 127.0
+offset_left = 1.5
+offset_right = 38.5
 offset_bottom = 52.0
+rotation = -9.13717
 pivot_offset = Vector2(19, 26)
 mouse_filter = 2
 texture = ExtResource("5_s1m7a")
 expand_mode = 1
 
-[node name="@TextureRect@72557" type="TextureRect" parent="CardHand"]
+[node name="@TextureRect@24695" type="TextureRect" parent="CardHand"]
 layout_mode = 0
-offset_left = 120.0
-offset_right = 157.0
+offset_left = 21.5
+offset_right = 58.5
 offset_bottom = 52.0
+rotation = -8.84956
 pivot_offset = Vector2(19, 26)
 mouse_filter = 2
 texture = ExtResource("5_s1m7a")

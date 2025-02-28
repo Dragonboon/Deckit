@@ -118,7 +118,6 @@ func lock() -> void:
 	is_locked = true
 	disabled = true
 	hide()
-	reset_rotation()
 
 
 func unlock() -> void:

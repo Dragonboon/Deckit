@@ -8,10 +8,6 @@
 
 config_version=5
 
-[Deckit]
-
-config/ninetailsrabbit.deckit/update_notification_enabled=true
-
 [application]
 
 config/name="Deckit"
