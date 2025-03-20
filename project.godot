@@ -8,12 +8,16 @@
 
 config_version=5
 
+[Deckit]
+
+config/ninetailsrabbit.deckit/update_notification_enabled=true
+
 [application]
 
 config/name="Deckit"
 config/description="A framework in Godot to manage playing cards and create games of this kind in no time at all."
 config/version="1.0.0"
-config/features=PackedStringArray("4.3", "GL Compatibility")
+config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [display]

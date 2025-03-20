@@ -35,3 +35,69 @@ static func set_owner_to_edited_scene_root(node: Node) -> void:
 static func remove_child_nodes(node: Node) -> void:
 	for child in node.get_children():
 		child.free()
+
+
+## Supports RegEx expressions
+static func get_files_recursive(path: String, regex: RegEx = null) -> Array:
+	if path.is_empty() or not DirAccess.dir_exists_absolute(path):
+		push_error("IndieBlueprintFileHelper>get_files_recursive: directory not found '%s'" % path)
+
+		return []
+
+	var files = []
+	var directory = DirAccess.open(path)
+	
+	if directory:
+		directory.list_dir_begin()
+		var file := directory.get_next()
+		
+		while file != "":
+			if directory.current_is_dir():
+				files += get_files_recursive(directory.get_current_dir().path_join(file), regex)
+			else:
+				var file_path = directory.get_current_dir().path_join(file)
+				
+				if regex != null:
+					if regex.search(file_path):
+						files.append(file_path)
+				else:
+					files.append(file_path)
+					
+			file = directory.get_next()
+			
+		return files
+	else:
+		push_error("IndieBlueprintFileHelper->get_files_recursive: An error %s occured when trying to open directory: %s" % [DirAccess.get_open_error(), path])
+		
+		return []
+
+
+static func get_resource_files(path: String) -> Array[Resource]:
+	var regex = RegEx.new()
+	regex.compile(".tres$")
+	
+	var resources: Array[Resource] = []
+	resources.assign(get_files_recursive(path, regex)\
+		.map(func(filepath: String): return ResourceLoader.load(filepath)))
+
+	return resources
+	
+
+static func dirpath_is_valid(path: String) -> bool:
+	return not path.is_empty() and path.is_absolute_path() and DirAccess.dir_exists_absolute(path)
+
+
+static func center_texture_rect_pivot(texture_rect: TextureRect) -> TextureRect:
+	if texture_rect.texture:
+		texture_rect.pivot_offset = (texture_rect.texture.get_size() / 2).ceil()
+	
+	return texture_rect
+
+
+static func repeat(element: Variant, times: int) -> Array[Variant]:
+	var result: Array[Variant] = []
+	
+	for _time: int in times:
+		result.append(element.duplicate())
+		
+	return result

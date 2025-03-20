@@ -40,7 +40,7 @@ enum Orientation {
 @export var can_be_discarded: bool = true
 @export var can_be_added_to_hand: bool = true
 @export_group("Texture")
-## When is not Vector2(0, 0) this size will override the original one
+## When is not Vector2(0, 0) this size will override the original textures size
 @export var texture_size: Vector2 = Vector2.ZERO
 ## The front texture that displays the value of the card
 @export var front_texture: CompressedTexture2D

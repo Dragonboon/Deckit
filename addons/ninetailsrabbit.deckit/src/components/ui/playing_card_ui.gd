@@ -1,4 +1,3 @@
-@icon("res://addons/ninetailsrabbit.deckit/assets/playing_card.svg")
 class_name DeckitPlayingCardUI extends Control
 
 const GroupName: StringName = &"playing-cards"
@@ -73,7 +72,7 @@ var is_locked: bool = false:
 			else:
 				draggable_2d.unlock()
 
-var detected_pile: CardPile
+var detected_pile: DeckitCardPile
 
 
 func _enter_tree() -> void:
@@ -87,7 +86,7 @@ func _ready() -> void:
 	_prepare_card_texture()
 	_prepare_shadow()
 	
-	DeckitUtils.center_pivot(card_texture)
+	DeckitUtils.center_texture_rect_pivot(card_texture)
 	
 	_prepare_draggable()
 	_prepare_card_area()
@@ -209,10 +208,10 @@ func _prepare_card_area() -> void:
 #region Signal callbacks
 func on_drop_zone_entered(other_area: Area2D) -> void:
 	if card.can_be_dropped_on_piles:
-		detected_pile = other_area.get_parent() as CardPile
+		detected_pile = other_area.get_parent() as DeckitCardPile
 
 
-func on_drop_zone_exited(other_area: Area2D) -> void:
+func on_drop_zone_exited(_other_area: Area2D) -> void:
 	detected_pile = null
 
 

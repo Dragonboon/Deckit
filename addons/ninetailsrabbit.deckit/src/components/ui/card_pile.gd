@@ -1,6 +1,5 @@
-@icon("res://addons/ninetailsrabbit.deckit/assets/card_pile.svg")
 @tool
-class_name CardPile extends Control
+class_name DeckitCardPile extends Control
 
 const GroupName: StringName = &"deck-piles"
 
@@ -63,9 +62,9 @@ enum StackMode {
 			stack_separation = new_separation
 			adjust_cards_to_stack()
 ## Set the min angle in degrees to apply in a card when is dropped
-@export var min_rotation_on_card_dropped: float = -5.0
+@export_range(-360.0, 360.0, 0.01, "degrees") var min_rotation_on_card_dropped: float = -5.0
 ## Set the max angle in degrees to apply in a card when is dropped
-@export var max_rotation_on_card_dropped: float = 5.0
+@export_range(-360.0, 360.0, 0.01, "degrees") var max_rotation_on_card_dropped: float = 5.0
 
 @export_category("Rules")
 ## When enabled the last card can be moved from the pile
@@ -111,7 +110,7 @@ func change_detection_area_size(new_size: Vector2) -> void:
 
 
 func change_empty_texture_size(new_size: Vector2) -> void:
-	DeckitUtils.center_pivot(empty_pile_texture_rect)
+	DeckitUtils.center_texture_rect_pivot(empty_pile_texture_rect)
 	
 	empty_pile_texture_rect.z_index = 0
 	empty_pile_texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -140,7 +139,12 @@ func card_can_be_added_to_pile(playing_card: DeckitPlayingCardUI) -> bool:
 func add_card(card: DeckitPlayingCardUI) -> void:
 	if card_can_be_added_to_pile(card):
 		current_cards.append(card)
-		card.reparent(self, false)
+		
+		if card.is_inside_tree():
+			card.reparent(self, false)
+		else:
+			add_child(card)
+		
 		card.position = Vector2.ZERO
 		card.z_as_relative = true
 		move_child(card, current_cards.size() + 1)
@@ -304,6 +308,7 @@ func adjust_card_to_stack(new_card: DeckitPlayingCardUI) -> void:
 	var index: int = current_cards.find(new_card)
 	
 	new_card.position = Vector2.ZERO
+	new_card.rotation_degrees = randf_range(min_rotation_on_card_dropped, max_rotation_on_card_dropped)
 	
 	match stack_mode:
 		StackMode.InPlaceFaceUp:
@@ -323,19 +328,21 @@ func adjust_card_to_stack(new_card: DeckitPlayingCardUI) -> void:
 				new_card.position += (stack_separation * Vector2.LEFT) * index
 			StackMode.CustomDirection:
 				new_card.position += (stack_separation * stack_direction) * index
-
+		
 #endregion
 
 #region Signal callbacks
 func on_added_card(new_card: DeckitPlayingCardUI) -> void:
 	if is_full():
 		filled.emit()
-		
+	
+	await get_tree().process_frame
 	adjust_card_to_stack(new_card)
 	update_card_locks()
 	
 
 func on_removed_card(_removed_card: DeckitPlayingCardUI) -> void:
+	await get_tree().process_frame
 	adjust_cards_to_stack()
 	update_card_locks()
 

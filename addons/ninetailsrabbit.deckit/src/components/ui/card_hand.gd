@@ -1,6 +1,6 @@
 @icon("res://addons/ninetailsrabbit.deckit/assets/card_hand.svg")
 @tool
-class_name CardHand extends Control
+class_name DeckitCardHand extends Control
 
 const GroupName: StringName = &"card-hands"
 
@@ -8,7 +8,6 @@ signal added_card(card: DeckitPlayingCardUI)
 signal added_cards(cards: Array[DeckitPlayingCardUI])
 signal removed_card(card: DeckitPlayingCardUI)
 signal add_card_request_denied(card: DeckitPlayingCardUI)
-signal add_cards_request_denied(card: Array[DeckitPlayingCardUI])
 signal sorted_cards(previous: Array[DeckitPlayingCardUI], current: Array[DeckitPlayingCardUI])
 signal selected_card(card: DeckitPlayingCardUI)
 signal selected_cards(cards: Array[DeckitPlayingCardUI])
@@ -155,10 +154,22 @@ func has_card(card: DeckitPlayingCardUI) -> bool:
 	return current_cards.has(card)
 
 
+func add_cards(cards: Array[DeckitPlayingCardUI]) -> void:
+	for card in cards:
+		add_card(card)
+		
+	added_cards.emit(cards)
+
+
 func add_card(card: DeckitPlayingCardUI) -> void:
 	if card_can_be_added_to_hand(card):
 		current_cards.append(card)
-		card.reparent(self)
+		
+		if card.is_inside_tree():
+			card.reparent(self, false)
+		else:
+			add_child(card)
+			
 		card.position = Vector2.ZERO
 		card.z_as_relative = true
 		card.z_index = current_cards.size() + 1
@@ -190,8 +201,8 @@ func remove_selected_card(card: DeckitPlayingCardUI) -> bool:
 		card.set_deferred("z_index", current_cards.size())
 		
 		if maximum_cards > 0 and current_selected_cards.size() == maximum_selected_cards:
-			for unselected_card: DeckitPlayingCardUI in unselected_cards():
-				unselected_card.lock()
+			for non_selected_card: DeckitPlayingCardUI in unselected_cards():
+				non_selected_card.lock()
 				
 		unselected_card.emit(card)
 		
@@ -211,12 +222,17 @@ func remove_card(card: DeckitPlayingCardUI):
 		card.z_as_relative = false
 		call_deferred("update_hand_display_layout")
 		
-		card.reparent(get_tree().current_scene)
+		#card.reparent(get_tree().current_scene)
 		
 		hand_cards_position.erase(card)
 		current_cards.erase(card)
 		removed_card.emit(card)
 		
+		
+func remove_cards(cards: Array[DeckitPlayingCardUI]):
+	for card: DeckitPlayingCardUI in cards:
+		remove_card(card)
+
 
 func remove_random_card() -> DeckitPlayingCardUI:
 	if current_cards.is_empty():
@@ -226,6 +242,10 @@ func remove_random_card() -> DeckitPlayingCardUI:
 	remove_card(card)
 	
 	return card
+
+
+func remove_current_cards() -> void:
+	remove_cards(current_cards)
 
 
 func card_can_be_added_to_hand(card: DeckitPlayingCardUI) -> bool:
@@ -301,11 +321,10 @@ func calculate_card_horizontal_layout_rotation(card: DeckitPlayingCardUI) -> flo
 	
 
 func update_irregular_fan_layout() -> void:
-	var cards_size: int = current_cards.size()
-	
 	for card: DeckitPlayingCardUI in current_cards:
 		card.position = calculate_irregular_fan_layout_position(card)
 		card.rotation = calculate_irregular_fan_layout_rotation(card)
+		
 		hand_cards_position.get_or_add(card, {"position": card.position, "rotation": card.rotation})
 
 
@@ -329,13 +348,7 @@ func calculate_irregular_fan_layout_position(card: DeckitPlayingCardUI) -> Vecto
 
 func calculate_irregular_fan_layout_rotation(card: DeckitPlayingCardUI) -> float:
 	if has_card(card):
-		var index: int = current_cards.find(card)
-		
-		return lerp_angle(
-			-irregular_fan_max_rotation, 
-			irregular_fan_max_rotation, 
-			float(index) / float(current_cards.size())
-			)
+		return randf_range(deg_to_rad(-irregular_fan_max_rotation), deg_to_rad(irregular_fan_max_rotation))
 		
 	return 0.0
 
@@ -391,7 +404,7 @@ func draw_preview_cards() -> void:
 			add_child(preview_card)
 			
 			DeckitUtils.set_owner_to_edited_scene_root(preview_card)
-			DeckitUtils.center_pivot(preview_card)
+			DeckitUtils.center_texture_rect_pivot(preview_card)
 		
 		update_hand_display_layout()
 	else:
@@ -405,10 +418,10 @@ func update_horizontal_preview_layout() -> void:
 		var index: int = 0
 		
 		for preview_card in get_children():
-			index += 1
 			preview_card.position = Vector2.ZERO
 			preview_card.position += (horizontal_direction * horizontal_separation) * index
 			preview_card.rotation = randf_range(min_rotation_angle, max_rotation_angle)
+			index += 1
 			
 			
 func update_irregular_fan_preview_layout() -> void:
@@ -426,7 +439,10 @@ func update_irregular_fan_preview_layout() -> void:
 			final_position.x += (irregular_fan_card_offset_x * cards_size) / 2.0
 			final_position.y = 0
 			
-			var final_rotation: float = lerp_angle(-irregular_fan_max_rotation, irregular_fan_max_rotation, float(index) / float(cards_size))
+			var final_rotation: float = randf_range(
+				deg_to_rad(-irregular_fan_max_rotation), 
+				deg_to_rad(irregular_fan_max_rotation)
+			)
 			
 			preview_card.position = final_position
 			preview_card.rotation = final_rotation

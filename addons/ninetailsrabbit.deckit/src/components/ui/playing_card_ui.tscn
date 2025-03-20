@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://dypmo68q4swhg"]
 
-[ext_resource type="Script" path="res://addons/ninetailsrabbit.deckit/src/components/ui/playing_card_ui.gd" id="1_31p71"]
-[ext_resource type="Script" path="res://addons/ninetailsrabbit.deckit/src/components/utils/draggable_2d.gd" id="4_2yupj"]
+[ext_resource type="Script" uid="uid://dx4bcovpq2kkm" path="res://addons/ninetailsrabbit.deckit/src/components/ui/playing_card_ui.gd" id="1_31p71"]
+[ext_resource type="Script" uid="uid://cdno05xncraem" path="res://addons/ninetailsrabbit.deckit/src/components/utils/draggable_2d.gd" id="4_2yupj"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k3edh"]
 
@@ -30,7 +30,6 @@ offset_right = 8.0
 offset_bottom = 8.0
 script = ExtResource("4_2yupj")
 draggable = NodePath("../..")
-reset_position_on_release = false
 
 [node name="CardArea" type="Area2D" parent="."]
 unique_name_in_owner = true
