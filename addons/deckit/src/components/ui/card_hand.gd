@@ -1,4 +1,4 @@
-@icon("res://addons/ninetailsrabbit.deckit/assets/card_hand.svg")
+@icon("res://addons/deckit/assets/card_hand.svg")
 @tool
 class_name DeckitCardHand extends Control
 

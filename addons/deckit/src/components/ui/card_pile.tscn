@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://c5t5udmax5nfo"]
+[gd_scene format=3 uid="uid://c5t5udmax5nfo"]
 
-[ext_resource type="Script" uid="uid://du51pflgw0upk" path="res://addons/ninetailsrabbit.deckit/src/components/ui/card_pile.gd" id="1_0ecm5"]
+[ext_resource type="Script" uid="uid://du51pflgw0upk" path="res://addons/deckit/src/components/ui/card_pile.gd" id="1_0ecm5"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4d82l"]
 size = Vector2(37, 52)

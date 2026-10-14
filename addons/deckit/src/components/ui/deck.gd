@@ -16,7 +16,7 @@ signal shuffled
 ## When enabled, this deck can contain duplicated cards
 @export var allow_duplicate_cards: bool = false
 @export var deck_type: DeckType = DeckType.French
-@export var playing_card_scene: PackedScene = preload("res://addons/ninetailsrabbit.deckit/src/components/ui/playing_card_ui.tscn")
+@export var playing_card_scene: PackedScene = preload("res://addons/deckit/src/components/ui/playing_card_ui.tscn")
 @export_category("Visuals")
 @export var visual_pile_cards_amount: int = 5
 @export var stack_direction: Vector2 = Vector2.ONE:
