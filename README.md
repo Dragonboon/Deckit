@@ -58,9 +58,9 @@ game.perform(DeckitCardAction.new(&"draw", &"hand", card.instance_id))
 
 See **[Core API and rules](docs/CORE_API.md)** for practical usage, limitations, and reproducible headless tests.
 
-## Explore eight interactive labs
+## Explore nine interactive labs
 
-Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, **Legacy Visual Components**, **State + Presentation**, **Targets & Effects**, **Event Queue**, **Turns & Phases**, or **Priority Windows**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
+Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, **Legacy Visual Components**, **State + Presentation**, **Targets & Effects**, **Event Queue**, **Turns & Phases**, **Priority Windows**, or **Deck Builder**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
 
 ## Optional actions and effects
 
@@ -78,6 +78,10 @@ The [turn manager](docs/TURNS_AND_PHASES.md) coordinates configurable participan
 
 The [priority window](docs/PRIORITY_WINDOWS.md) supports multiple participants passing, staging actions and resolving them in selectable LIFO/FIFO order. Turn blocking and lifecycle event reporting are opt-in, and all executed actions still go through the game state's rules.
 
+## Deck building toolkit
+
+The [deck builder](docs/DECK_BUILDER.md) provides catalogs, editable deck recipes, configurable constraints, validation, JSON import/export and an optional drag-free visual editor. It deliberately keeps deck recipes independent from runtime card instances and game-specific rules.
+
 ## Existing UI components
 
 Deckit still includes its original `DeckitDeck`, `DeckitCardHand`, `DeckitCardPile`, `DeckitPlayingCardUI`, `DeckitPlayingCard` and `DeckitDeckCreator` components. These support traditional French/Spanish suits, drag-and-drop, card stacks and hand layouts.
@@ -87,7 +91,7 @@ They remain available while their integration and refactor proceed incrementally
 ## Roadmap
 
 - Bind the existing UI components to card instances and zones without hardcoded game rules.
-- Expand reusable effects, deck-building validation and optional TCG/LCG integrations.
+- Expand reusable effects and optional TCG/LCG integrations.
 - Extend the example lab catalog, add persistence interfaces and further Godot 4.7 validation.
 - Keep multiplayer transport and game policy optional, never mandatory dependencies.
 
