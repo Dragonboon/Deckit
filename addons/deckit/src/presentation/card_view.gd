@@ -63,6 +63,7 @@ func refresh() -> void:
 ## Selection is presentation state, not a card or game-state mutation.
 func set_selected(selected: bool) -> void:
 	if is_selected == selected:
+		set_pressed_no_signal(selected)
 		return
 	is_selected = selected
 	if selected:
