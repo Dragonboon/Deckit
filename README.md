@@ -58,9 +58,13 @@ game.perform(DeckitCardAction.new(&"draw", &"hand", card.instance_id))
 
 See **[Core API and rules](docs/CORE_API.md)** for practical usage, limitations, and reproducible headless tests.
 
-## Explore four interactive labs
+## Explore five interactive labs
 
-Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, **Legacy Visual Components**, or **State + Presentation**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
+Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, **Legacy Visual Components**, **State + Presentation**, or **Targets & Effects**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
+
+## Optional actions and effects
+
+The [`actions and effects`](docs/ACTIONS_AND_EFFECTS.md) layer provides target selection, conditional effects, card counters, face changes and stepwise action sequences. Sequences are **not transactional**: previous successful steps are not rolled back on a later failure.
 
 ## Existing UI components
 

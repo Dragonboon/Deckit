@@ -8,6 +8,7 @@ Start **`res://examples/labs/lab_hub.tscn`** from Godot 4.7. No external assets 
 | `rule_gate_lab.tscn` | Tagged cards, actor restrictions, optional rule toggling, capacity 2 and rejected actions with unchanged zones | New headless core + example-only custom rule |
 | `legacy_ui_lab.tscn` | Hand horizontal/fan/arc layouts, card creation and presentation, face toggling and visual piles | Existing legacy UI |
 | `presenter_lab.tscn` | State-driven card views, authoritative transfers, per-viewer disclosure, counters, rejection feedback | Optional presenter + core |
+| `actions_lab.tscn` | Target selection, tag conditions, counter/face effects, move + effect sequences | Optional actions + core |
 
 ## Boundaries
 
