@@ -42,3 +42,31 @@ func perform(action: DeckitCardAction) -> bool:
 		return false
 	action_applied.emit(action)
 	return true
+
+## Non-mutating runtime check for mismatched zones or duplicate instance IDs.
+## Call after materializing a deck and before persisting or starting a match.
+## Public zones may be changed directly; this reports violations but does not
+## substitute for authoritative game rules or automatic ID allocation.
+func inspect_integrity() -> PackedStringArray:
+	var problems := PackedStringArray()
+	var seen_ids: Dictionary = {}
+	for key in zones:
+		var zone: DeckitCardZone = zones[key]
+		if zone == null:
+			problems.append("Null zone registered under %s" % key)
+			continue
+		if zone.zone_id != key:
+			problems.append("Zone registry key and zone_id differ for %s" % key)
+		if zone.capacity > 0 and zone.cards.size() > zone.capacity:
+			problems.append("Zone %s exceeds capacity" % key)
+		for card in zone.cards:
+			if card == null or card.definition == null or card.instance_id == &"":
+				problems.append("Zone %s contains an invalid card instance" % key)
+				continue
+			if seen_ids.has(card.instance_id):
+				problems.append("Duplicate instance ID %s in zones %s and %s" % [
+					card.instance_id, seen_ids[card.instance_id], key
+				])
+			else:
+				seen_ids[card.instance_id] = key
+	return problems

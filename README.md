@@ -80,6 +80,10 @@ The nine labs cover card movement, rule checks, classic visuals, data-driven vie
 
 The labs are **outside the add-on folder** so they do not get bundled when you install only `addons/deckit/`.
 
+## Game compatibility
+
+Deckit supplies reusable foundations for Spanish and French classic decks, original trading-card games and living-card-style games, but **does not automatically implement their gameplay rules**. See the [game compatibility matrix](docs/GAME_COMPATIBILITY.md) for a per-mechanic audit, example genres and known gaps.
+
 ## Important boundaries
 
 Deckit supplies building blocks, **not a finished game**. In particular:

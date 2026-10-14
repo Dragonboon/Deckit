@@ -1,6 +1,7 @@
 ## Opt-in, UI-independent turn/phase coordinator.
 ## Provides only an ordered clock: no combat, resource, action or player rules.
 ## All mutations are explicit and transitions are guarded against reentry.
+## End signals expose outgoing state; start signals expose incoming state.
 class_name DeckitTurnManager extends RefCounted
 
 signal timeline_started
@@ -91,10 +92,11 @@ func start(first_participant: StringName = &"") -> bool:
 		if first_index < 0:
 			return false
 	var participant: StringName = participants[first_index]
+	_transitioning = true
 	if not _allowed(participant, phases[0]):
 		transition_denied.emit(participant, phases[0])
+		_transitioning = false
 		return false
-	_transitioning = true
 	_participant_index = first_index
 	_phase_index = 0
 	turn_number = 1
@@ -115,10 +117,11 @@ func next_phase() -> bool:
 	if _phase_index + 1 >= phases.size():
 		return _advance_turn()
 	var next_phase_id: StringName = phases[_phase_index + 1]
+	_transitioning = true
 	if not _allowed(current_participant(), next_phase_id):
 		transition_denied.emit(current_participant(), next_phase_id)
+		_transitioning = false
 		return false
-	_transitioning = true
 	var old_phase: StringName = current_phase()
 	var old_participant: StringName = current_participant()
 	var old_turn: int = turn_number
@@ -139,21 +142,23 @@ func end_turn() -> bool:
 func _advance_turn() -> bool:
 	var next_index: int = (_participant_index + 1) % participants.size()
 	var next_participant: StringName = participants[next_index]
+	_transitioning = true
 	if not _allowed(next_participant, phases[0]):
 		transition_denied.emit(next_participant, phases[0])
+		_transitioning = false
 		return false
-	_transitioning = true
 	var old_participant: StringName = current_participant()
 	var old_phase: StringName = current_phase()
 	var old_turn: int = turn_number
 	var old_round: int = round_number
+	# Complete outgoing lifecycle before publishing the incoming position.
+	phase_ended.emit(old_participant, old_phase, old_turn)
+	turn_ended.emit(old_participant, old_turn, old_round)
 	_phase_index = 0
 	_participant_index = next_index
 	turn_number += 1
 	if next_index == 0:
 		round_number += 1
-	phase_ended.emit(old_participant, old_phase, old_turn)
-	turn_ended.emit(old_participant, old_turn, old_round)
 	turn_started.emit(current_participant(), turn_number, round_number)
 	phase_started.emit(current_participant(), current_phase(), turn_number)
 	_transitioning = false

@@ -14,6 +14,7 @@ godot --headless --path . --script res://tests/headless/test_priority.gd
 godot --headless --path . --script res://tests/headless/test_turn_signal_order.gd
 godot --headless --path . --script res://tests/headless/test_integration.gd
 godot --headless --path . --script res://tests/headless/test_deck_builder.gd
+godot --headless --path . --script res://tests/headless/test_game_families.gd
 ```
 
 ## Module boundaries
