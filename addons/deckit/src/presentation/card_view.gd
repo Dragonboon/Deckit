@@ -7,11 +7,14 @@ signal card_requested(instance_id: StringName)
 
 var card_instance: DeckitCardInstance
 var front_revealed: bool = false
+## Visual selection only: the host owns action legality and selected IDs.
+var is_selected: bool = false
 
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(112, 158)
 	focus_mode = Control.FOCUS_ALL
+	toggle_mode = true
 	expand_icon = true
 	icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	pressed.connect(_on_pressed)
@@ -51,8 +54,29 @@ func refresh() -> void:
 		text = "Face down"
 		icon = definition.back_texture if definition != null else null
 		tooltip_text = "Face-down card. Activate to select."
-	if not is_node_ready():
+	if is_selected:
+		text += "\n● SELECTED"
+		tooltip_text += " Selected. Activate to deselect."
+	set_pressed_no_signal(is_selected)
+
+
+## Selection is presentation state, not a card or game-state mutation.
+func set_selected(selected: bool) -> void:
+	if is_selected == selected:
 		return
+	is_selected = selected
+	if selected:
+		var highlight := StyleBoxFlat.new()
+		highlight.bg_color = Color(0.16, 0.29, 0.39, 0.94)
+		highlight.border_color = Color(0.98, 0.76, 0.31)
+		highlight.set_border_width_all(4)
+		highlight.set_corner_radius_all(9)
+		for state in ["normal", "hover", "pressed", "focus"]:
+			add_theme_stylebox_override(state, highlight)
+	else:
+		for state in ["normal", "hover", "pressed", "focus"]:
+			remove_theme_stylebox_override(state)
+	refresh()
 
 
 func _on_pressed() -> void:

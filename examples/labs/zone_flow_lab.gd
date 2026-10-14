@@ -9,6 +9,8 @@ var counts: Dictionary[StringName, Label] = {}
 var selection: Dictionary[StringName, StringName] = {}
 var status: Label
 var visual_zones: Array[DeckitZoneView] = []
+var selection_info: Label
+var selected_actions: Array[Button] = []
 
 
 func _ready() -> void:
@@ -23,8 +25,8 @@ func _ready() -> void:
 	DeckitLabUI.button(actions, "Discard from table", _transfer.bind(&"table", &"discard"))
 	DeckitLabUI.button(actions, "Recycle discard", _transfer.bind(&"discard", &"draw"))
 	DeckitLabUI.button(actions, "Shuffle draw", _shuffle)
-	DeckitLabUI.button(actions, "Flip selected", _flip)
-	DeckitLabUI.button(actions, "+1 counter", _add_counter)
+	selected_actions.append(DeckitLabUI.button(actions, "Flip selected", _flip))
+	selected_actions.append(DeckitLabUI.button(actions, "+1 counter", _add_counter))
 	DeckitLabUI.button(actions, "Reset", _reset)
 
 	var zones_row := HBoxContainer.new()
@@ -46,6 +48,8 @@ func _ready() -> void:
 	for id in ZONE_IDS:
 		var view := DeckitLabCardArt.zone_panel(visual_row, game, id, &"demo", 2)
 		visual_zones.append(view)
+		view.card_requested.connect(_on_visual_selected)
+	selection_info = DeckitLabUI.info(page, "")
 	status = DeckitLabUI.info(page, "")
 	game.action_applied.connect(_on_applied)
 	game.action_rejected.connect(_on_rejected)
@@ -85,7 +89,17 @@ func _reset() -> void:
 func _on_selected(index: int, zone_id: StringName) -> void:
 	var zone := game.get_zone(zone_id)
 	if index >= 0 and index < zone.cards.size():
-		selection[zone_id] = zone.cards[index].instance_id
+		_set_selection(zone_id, zone.cards[index].instance_id)
+
+
+func _on_visual_selected(zone_id: StringName, instance_id: StringName) -> void:
+	_set_selection(zone_id, instance_id)
+
+
+func _set_selection(zone_id: StringName, instance_id: StringName) -> void:
+	selection.clear()
+	selection[zone_id] = instance_id
+	_sync_selection()
 
 
 func _chosen(zone_id: StringName) -> DeckitCardInstance:
@@ -101,14 +115,14 @@ func _transfer(source: StringName, destination: StringName) -> void:
 		return
 	var action := DeckitCardAction.new(source, destination, card.instance_id, &"demo")
 	if game.perform(action):
-		selection.erase(source)
+		selection.clear()
 		selection[destination] = card.instance_id
 	_refresh()
 
 
 func _shuffle() -> void:
 	game.get_zone(&"draw").shuffle_with_rng(randomizer)
-	selection.erase(&"draw")
+	selection.clear()
 	status.text = "Shuffled with caller-owned RNG seed 314159 (no global randomizer)."
 	_refresh()
 
@@ -172,3 +186,30 @@ func _refresh() -> void:
 			])
 			if card.instance_id == selection.get(zone_id, &""):
 				display.select(index)
+	_sync_selection()
+
+
+func _sync_selection() -> void:
+	if selection_info == null:
+		return
+	var active_zone: StringName = &""
+	var active_card: StringName = &""
+	for zone_id in ZONE_IDS:
+		var id: StringName = selection.get(zone_id, &"")
+		if id != &"" and game.get_zone(zone_id).find_by_id(id) != null:
+			active_zone = zone_id
+			active_card = id
+			break
+	if active_card == &"":
+		selection.clear()
+	for index in range(visual_zones.size()):
+		var ids: Array[StringName] = []
+		if ZONE_IDS[index] == active_zone:
+			ids.append(active_card)
+		visual_zones[index].set_selected_cards(ids)
+	selection_info.text = "Selected: %s (%s). Click any visible card or its list row." % [
+		active_card if active_card != &"" else &"none",
+		active_zone if active_card != &"" else &"no zone"
+	]
+	for control in selected_actions:
+		control.disabled = active_card == &""

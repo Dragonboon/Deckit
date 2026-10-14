@@ -7,6 +7,9 @@ var match_state: RefCounted
 var cards_list: ItemList
 var card_images: HFlowContainer
 var chosen_ids: Array[StringName] = []
+var play_button: Button
+var selection_info: Label
+var card_views: Dictionary = {}
 var status: Label
 var stats: Label
 
@@ -17,13 +20,12 @@ func _ready() -> void:
 		"Original small ruleset using generic Deckit components. Click cards, make a move, and reset to repeat.")
 	var controls := DeckitLabUI.controls(page)
 	if scenario == 1:
-		DeckitLabUI.button(controls, "Submit 3 selected cards", _play)
+		play_button = DeckitLabUI.button(controls, "Submit 3 selected cards", _play)
 	else:
-		DeckitLabUI.button(controls, "Play selected", _play)
+		play_button = DeckitLabUI.button(controls, "Play selected", _play)
 	if scenario == 2:
 		DeckitLabUI.button(controls, "End turn", _end_turn)
 	DeckitLabUI.button(controls, "Restart", _reset)
-	DeckitLabUI.heading(page, "Available cards")
 	DeckitLabUI.heading(page, "Cards (click to select)")
 	card_images = DeckitLabCardArt.zone_row(page)
 	cards_list = ItemList.new()
@@ -33,6 +35,7 @@ func _ready() -> void:
 	cards_list.multi_selected.connect(_multi_selected)
 	cards_list.tooltip_text = "Select a card using the mouse or keyboard. For French Melds select three."
 	page.add_child(cards_list)
+	selection_info = DeckitLabUI.info(page, "Select a card to continue.")
 	stats = DeckitLabUI.info(page, "")
 	status = DeckitLabUI.info(page, "")
 	_reset()
@@ -71,6 +74,7 @@ func _selected_index(index: int) -> void:
 		var cards: Array[DeckitCardInstance] = _cards()
 		if index >= 0 and index < cards.size():
 			chosen_ids.append(cards[index].instance_id)
+	_update_selection()
 
 
 func _multi_selected(index: int, selected: bool) -> void:
@@ -82,6 +86,7 @@ func _multi_selected(index: int, selected: bool) -> void:
 			chosen_ids.append(cards[index].instance_id)
 		elif not selected:
 			chosen_ids.erase(cards[index].instance_id)
+	_update_selection()
 
 
 func _play() -> void:
@@ -98,9 +103,12 @@ func _play() -> void:
 	else:
 		if selected.size() == 1 and selected[0] < cards.size():
 			ok = match_state.play(cards[selected[0]].instance_id)
-	if not ok and not match_state.finished:
-		status.text = "Move unavailable. Select a valid card or combination. " + match_state.last_message
-	_refresh()
+	if ok:
+		chosen_ids.clear()
+		_refresh()
+	elif not match_state.finished:
+		status.text = "Move unavailable. " + match_state.last_message
+		_update_selection()
 
 
 func _end_turn() -> void:
@@ -111,6 +119,7 @@ func _end_turn() -> void:
 
 func _refresh() -> void:
 	chosen_ids.clear()
+	card_views.clear()
 	for child in card_images.get_children():
 		card_images.remove_child(child)
 		child.queue_free()
@@ -119,11 +128,13 @@ func _refresh() -> void:
 		DeckitLabCardArt.decorate(card.definition)
 		var view := DeckitLabCardArt.card_button(card_images, card, true)
 		view.card_requested.connect(_on_card_requested)
+		card_views[card.instance_id] = view
 		var extra: String = ""
 		if scenario == 2:
 			extra = " (cost: %d)" % int(card.get_attribute(&"cost", 0))
 		cards_list.add_item(card.definition.display_name + extra)
 	status.text = match_state.last_message
+	_update_selection()
 	match scenario:
 		0:
 			stats.text = "Turn: %s | Trump: %s | Tricks: %d / 3 | P1: %d | P2: %d%s" % [
@@ -163,3 +174,17 @@ func _on_card_requested(instance_id: StringName) -> void:
 				cards_list.select(index)
 				_selected_index(index)
 			return
+
+
+func _update_selection() -> void:
+	if play_button == null or selection_info == null:
+		return
+	var required: int = 3 if scenario == 1 else 1
+	play_button.disabled = match_state.finished or chosen_ids.size() != required
+	selection_info.text = "Selected: %d / %d. %s" % [
+		chosen_ids.size(), required,
+		"Choose exactly three cards." if scenario == 1 else "Choose one card to play."
+	]
+	for id in card_views:
+		var view: DeckitCardView = card_views[id]
+		view.set_selected(chosen_ids.has(id))

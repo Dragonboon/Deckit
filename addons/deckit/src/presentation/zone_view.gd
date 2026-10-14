@@ -16,6 +16,7 @@ var max_visible_cards: int = 0
 var _heading: Label
 var _cards_row: HFlowContainer
 var _views: Dictionary = {}
+var _selected_ids: Array[StringName] = []
 
 
 func _ready() -> void:
@@ -76,6 +77,7 @@ func refresh() -> void:
 		_cards_row.move_child(card_view, visible_index)
 		visible_index += 1
 		card_view.display_card(card, _can_reveal(zone, card))
+		card_view.set_selected(_selected_ids.has(key))
 		active[key] = true
 
 	for key in _views.keys():
@@ -84,6 +86,20 @@ func refresh() -> void:
 			_cards_row.remove_child(removed)
 			removed.queue_free()
 			_views.erase(key)
+
+
+## Explicitly highlight the cards selected by the consuming scene.
+## This method does not select targets or execute any game action.
+func set_selected_cards(ids: Array[StringName]) -> void:
+	_selected_ids = ids.duplicate()
+	for key in _views:
+		var view: DeckitCardView = _views[key]
+		view.set_selected(_selected_ids.has(key))
+
+
+func clear_selection() -> void:
+	var empty: Array[StringName] = []
+	set_selected_cards(empty)
 
 
 func _clear_views() -> void:

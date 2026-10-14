@@ -50,3 +50,9 @@ See [Testing and troubleshooting](TESTING.md) for the complete local test suite.
 - **Customization:** card definitions support any tags and attributes; games register `DeckitCardRule`, `DeckitCardCondition`, `DeckitCardEffect`, `DeckitDeckRule`, event responders, and optional turn/priority policies. Demo-specific policies remain outside `addons/deckit/`.
 
 The sample artwork illustrates presentation, not network secrecy: never transmit concealed card definitions to unauthorized clients.
+
+## Selecting cards in the visual labs
+
+Card buttons now highlight selection with a **gold border and SELECTED label**. Where a list and cards are shown together, clicking either selects the same runtime card. Labs disable selection-dependent actions until a valid selection exists. The French Melds microgame requires **exactly three** selected cards; click a selected card again to deselect it. Other playable examples use single selection. After a move, the selection is cleared or transferred according to the scenario.
+
+The light **front** placeholder carries a simple Deckit D monogram on white; the decorative navy **back** remains unchanged. Both are illustrations only and do not change game logic.

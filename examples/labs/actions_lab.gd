@@ -9,6 +9,8 @@ var status: Label
 var cards_list: ItemList
 var visual: DeckitZoneView
 var condition := DeckitTagCondition.new()
+var selection_info: Label
+var action_buttons: Array[Button] = []
 
 
 func _ready() -> void:
@@ -17,10 +19,10 @@ func _ready() -> void:
 		"Select a card, then apply generic effects or a checked two-step sequence. Tagged restrictions belong to an optional condition."
 	)
 	var controls := DeckitLabUI.controls(page)
-	DeckitLabUI.button(controls, "Add counter", _effect.bind(false))
-	DeckitLabUI.button(controls, "Toggle face", _effect.bind(true))
-	DeckitLabUI.button(controls, "Conditional counter", _conditional)
-	DeckitLabUI.button(controls, "Move + counter sequence", _sequence)
+	action_buttons.append(DeckitLabUI.button(controls, "Add counter", _effect.bind(false)))
+	action_buttons.append(DeckitLabUI.button(controls, "Toggle face", _effect.bind(true)))
+	action_buttons.append(DeckitLabUI.button(controls, "Conditional counter", _conditional))
+	action_buttons.append(DeckitLabUI.button(controls, "Move + counter sequence", _sequence))
 	DeckitLabUI.button(controls, "Reset", _reset)
 	cards_list = ItemList.new()
 	cards_list.custom_minimum_size = Vector2(560, 200)
@@ -30,7 +32,9 @@ func _ready() -> void:
 	visual.card_requested.connect(func(_zone: StringName, id: StringName) -> void:
 		selected.clear()
 		selected.select(game, &"hand", id)
+		_sync_selection()
 	)
+	selection_info = DeckitLabUI.info(page, "")
 	status = DeckitLabUI.info(page, "")
 	game.action_applied.connect(_on_applied)
 	game.action_rejected.connect(_on_rejected)
@@ -56,6 +60,7 @@ func _reset() -> void:
 		source.add_card(card)
 	visual.bind(game, &"hand", &"demo")
 	status.text = "Select a card. The middle card lacks the eligible tag."
+	_sync_selection()
 	_refresh()
 
 
@@ -63,6 +68,7 @@ func _select(index: int) -> void:
 	if index < source.size():
 		selected.clear()
 		selected.select(game, &"hand", source.cards[index].instance_id)
+		_sync_selection()
 
 
 func _get_target() -> DeckitCardTarget:
@@ -140,3 +146,19 @@ func _refresh() -> void:
 		var target := selected.first()
 		if target != null and target.instance_id == card.instance_id:
 			cards_list.select(index)
+	_sync_selection()
+
+
+func _sync_selection() -> void:
+	if visual == null or selection_info == null:
+		return
+	var ids: Array[StringName] = []
+	var target := selected.first()
+	if target != null and target.resolve(game) != null:
+		ids.append(target.instance_id)
+	visual.set_selected_cards(ids)
+	selection_info.text = "Selected: %s. Choose a card in the list or click its image." % (
+		String(ids[0]) if not ids.is_empty() else "none"
+	)
+	for button in action_buttons:
+		button.disabled = ids.is_empty()

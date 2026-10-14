@@ -13,6 +13,8 @@ var selected_zone_id: StringName = &""
 var selected_card_id: StringName = &""
 var viewer_id: StringName = &"player-1"
 var status: Label
+var selection_info: Label
+var action_buttons: Dictionary = {}
 
 
 func _ready() -> void:
@@ -22,11 +24,11 @@ func _ready() -> void:
 	)
 	var tools := DeckitLabUI.controls(page)
 	DeckitLabUI.button(tools, "Draw", _move_top.bind(&"draw", &"hand"))
-	DeckitLabUI.button(tools, "Play selected", _move_selection.bind(&"hand", &"table"))
-	DeckitLabUI.button(tools, "Discard selected", _move_selection.bind(&"table", &"discard"))
+	action_buttons["play"] = DeckitLabUI.button(tools, "Play selected", _move_selection.bind(&"hand", &"table"))
+	action_buttons["discard"] = DeckitLabUI.button(tools, "Discard selected", _move_selection.bind(&"table", &"discard"))
 	DeckitLabUI.button(tools, "Recycle discard", _move_top.bind(&"discard", &"draw"))
-	DeckitLabUI.button(tools, "Flip selected", _flip_selected)
-	DeckitLabUI.button(tools, "Add counter", _count_selected)
+	action_buttons["flip"] = DeckitLabUI.button(tools, "Flip selected", _flip_selected)
+	action_buttons["counter"] = DeckitLabUI.button(tools, "Add counter", _count_selected)
 	DeckitLabUI.button(tools, "Swap viewer", _swap_viewer)
 	DeckitLabUI.button(tools, "Reset", _reset)
 
@@ -51,6 +53,7 @@ func _ready() -> void:
 		view.card_requested.connect(_on_requested)
 		views.append(view)
 
+	selection_info = DeckitLabUI.info(page, "")
 	status = DeckitLabUI.info(page, "")
 	game.action_applied.connect(_applied)
 	game.action_rejected.connect(_rejected)
@@ -90,12 +93,14 @@ func _reset() -> void:
 	var ids: Array[StringName] = [&"draw", &"hand", &"table", &"discard"]
 	for index in range(views.size()):
 		views[index].bind(game, ids[index], viewer_id)
+	_sync_selection()
 	status.text = "Reset: 6 unique instances. Hand capacity is 3; its contents are visible only to player-1 in this lab."
 
 
 func _on_requested(zone_id: StringName, instance_id: StringName) -> void:
 	selected_zone_id = zone_id
 	selected_card_id = instance_id
+	_sync_selection()
 	status.text = "Selected %s in %s. Use a button to request an action." % [
 		instance_id, zone_id
 	]
@@ -121,6 +126,7 @@ func _move(source_id: StringName, destination_id: StringName, instance_id: Strin
 	if game.perform(DeckitCardAction.new(source_id, destination_id, instance_id, &"player-1")):
 		selected_zone_id = &""
 		selected_card_id = &""
+		_sync_selection()
 
 
 func _selected() -> DeckitCardInstance:
@@ -154,6 +160,7 @@ func _swap_viewer() -> void:
 	viewer_id = &"spectator" if viewer_id == &"player-1" else &"player-1"
 	for view in views:
 		view.set_viewer(viewer_id)
+	_sync_selection()
 	status.text = "Viewer: %s. Hidden deck remains concealed; hand uses OWNER_ONLY policy." % viewer_id
 
 
@@ -172,3 +179,27 @@ func _rejected(action: DeckitCardAction) -> void:
 	status.text = "Rejected %s: %s → %s; views and state remain unchanged." % [
 		action.card_instance_id, action.source_zone_id, action.destination_zone_id
 	]
+
+
+func _sync_selection() -> void:
+	if selection_info == null:
+		return
+	var chosen: DeckitCardInstance = _selected()
+	if chosen == null:
+		selected_zone_id = &""
+		selected_card_id = &""
+	var ids: Array[StringName] = []
+	if chosen != null:
+		ids.append(selected_card_id)
+	for index in range(views.size()):
+		var zones: Array[StringName] = [&"draw", &"hand", &"table", &"discard"]
+		var visible_ids: Array[StringName] = ids if selected_zone_id == zones[index] else []
+		views[index].set_selected_cards(visible_ids)
+	selection_info.text = "Selected: %s in %s. Click a card, then choose an action." % [
+		selected_card_id if chosen != null else &"none",
+		selected_zone_id if chosen != null else &"none"
+	]
+	action_buttons["play"].disabled = selected_zone_id != &"hand"
+	action_buttons["discard"].disabled = selected_zone_id != &"table"
+	action_buttons["flip"].disabled = chosen == null
+	action_buttons["counter"].disabled = chosen == null

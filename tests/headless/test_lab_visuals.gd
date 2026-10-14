@@ -48,6 +48,15 @@ func _run() -> void:
 	top_view = view.get_card_view(&"copy-5")
 	if top_view != null:
 		_check(top_view.icon == front and top_view.text == "Test Card", "Face-up zone uses front")
+	var chosen: Array[StringName] = [&"copy-5"]
+	view.set_selected_cards(chosen)
+	var selected_view: DeckitCardView = view.get_card_view(&"copy-5")
+	_check(selected_view.is_selected and selected_view.button_pressed, "Card highlights selection")
+	_check(selected_view.text.contains("SELECTED"), "Accessible selected marker")
+	view.refresh()
+	_check(view.get_card_view(&"copy-5").is_selected, "Selection survives refresh")
+	view.clear_selection()
+	_check(not view.get_card_view(&"copy-5").is_selected, "Selection clears")
 	view.queue_free()
 	print("[Deckit visual labs] %d checks, %d failures" % [checks, errors])
 	quit(0 if errors == 0 else 1)
