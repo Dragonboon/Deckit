@@ -11,6 +11,7 @@ Start **`res://examples/labs/lab_hub.tscn`** from Godot 4.7. No external assets 
 | `actions_lab.tscn` | Target selection, tag conditions, counter/face effects, move + effect sequences | Optional actions + core |
 | `events_lab.tscn` | Queued action notifications, event priority, explicit response resolution and safety caps | Optional events + core |
 | `turns_lab.tscn` | Configure participants and phases, advance or skip, pause/resume, and publish optional events | Optional turn manager + event bridge |
+| `priority_lab.tscn` | Open priority windows, stage actions, pass, resolve, cancel, block phase advancement | Optional priority window + gates |
 
 ## Boundaries
 

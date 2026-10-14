@@ -58,9 +58,9 @@ game.perform(DeckitCardAction.new(&"draw", &"hand", card.instance_id))
 
 See **[Core API and rules](docs/CORE_API.md)** for practical usage, limitations, and reproducible headless tests.
 
-## Explore seven interactive labs
+## Explore eight interactive labs
 
-Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, **Legacy Visual Components**, **State + Presentation**, **Targets & Effects**, **Event Queue**, or **Turns & Phases**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
+Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, **Legacy Visual Components**, **State + Presentation**, **Targets & Effects**, **Event Queue**, **Turns & Phases**, or **Priority Windows**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
 
 ## Optional actions and effects
 
@@ -73,6 +73,10 @@ The [event queue](docs/EVENTS.md) supports opt-in event notifications, explicit 
 ## Optional turns and phases
 
 The [turn manager](docs/TURNS_AND_PHASES.md) coordinates configurable participants and phases with pause/resume and transition hooks. Its event bridge is strictly opt-in and never imposes game-specific action legality or automatic progression.
+
+## Optional priority windows
+
+The [priority window](docs/PRIORITY_WINDOWS.md) supports multiple participants passing, staging actions and resolving them in selectable LIFO/FIFO order. Turn blocking and lifecycle event reporting are opt-in, and all executed actions still go through the game state's rules.
 
 ## Existing UI components
 

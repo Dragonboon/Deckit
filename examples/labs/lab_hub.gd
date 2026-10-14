@@ -14,6 +14,7 @@ func _ready() -> void:
 	DeckitLabUI.button(page, "05  Targets, effects, conditions and sequences", _open.bind("actions_lab"))
 	DeckitLabUI.button(page, "06  Event queue: notifications, priorities and responses", _open.bind("events_lab"))
 	DeckitLabUI.button(page, "07  Optional timeline: phases, turns and pause", _open.bind("turns_lab"))
+	DeckitLabUI.button(page, "08  Priority windows: passes, responses and resolution", _open.bind("priority_lab"))
 	DeckitLabUI.info(
 		page,
 		"Start each lab independently; use the All labs button to return. Labs 01–02 exercise the headless core; 03 tests legacy nodes; 04 uses the optional new presenter without game rules."
