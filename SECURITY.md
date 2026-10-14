@@ -1,15 +1,9 @@
-# Security policy
+# Security and hidden-card information
 
-Deckit is a Godot plugin, not a network authority, encryption library or anti-cheat system.
+Deckit is a local Godot toolkit, **not** a network server or an anti-cheat system.
 
-## Supported code
+- `DeckitCardZone.Visibility` and the optional visual components control what is **displayed**, not which card data a peer can access.
+- Multiplayer and online games must filter concealed card definitions and state **before** sending data to other players, and validate actions on the authoritative side.
+- The current project target is Godot 4.7.x. Refer to [Testing and troubleshooting](docs/TESTING.md) for installation checks and known boundaries.
 
-The current development target is **Godot 4.7** on the repository's `main` branch. Older engine versions are not the supported target for this refactor.
-
-## Reporting concerns
-
-For security-sensitive problems, avoid posting exploits, private tokens or personal data in a public issue. Use GitHub's [private vulnerability reporting](https://github.com/sempitern0/Deckit/security/advisories/new) if it is enabled for this repository. If it is not available, ask the repository maintainer for a private reporting channel without disclosing exploit details.
-
-## Important limitation
-
-Card visibility settings are presentation hints. Do not distribute secret card definitions or authoritative game state to untrusted players when implementing multiplayer. The host game is responsible for access control, transport security and input validation.
+If you find a security-sensitive issue, use [GitHub private vulnerability reporting](https://github.com/sempitern0/Deckit/security/advisories/new) if available, rather than publishing exploitable details in a public issue.

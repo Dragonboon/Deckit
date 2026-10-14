@@ -1,11 +1,10 @@
-## Description
+## Summary
+What does this change improve for someone installing or using Deckit?
 
-Add your description here, especially why you made these changes and what problem you tried to solve.
+## Verification
+- [ ] Tested with Godot 4.7.x
+- [ ] Relevant labs/examples checked
+- [ ] Relevant headless tests run
+- [ ] Documentation updated if API or behavior changed
 
-## Addressed issues
-
-- List issues here, reference them via #
-
-## Screenshots (Optional)
-
-Show your changes with screenshots
+## Related issue
