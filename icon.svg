@@ -1,9 +1,33 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128px" height="128px" viewBox="0 0 128 128" version="1.1">
-<g id="surface1">
-<path style=" stroke:none;fill-rule:nonzero;fill:rgb(95.686275%,26.274511%,21.176471%);fill-opacity:1;" d="M 108.800781 19.199219 L 102.398438 19.199219 L 102.398438 108.800781 C 102.390625 112.332031 99.53125 115.191406 96 115.199219 L 32 115.199219 C 28.46875 115.191406 25.609375 112.332031 25.601562 108.800781 L 25.601562 19.199219 C 25.609375 15.667969 28.46875 12.808594 32 12.800781 L 96 12.800781 C 99.53125 12.808594 102.390625 15.667969 102.398438 19.199219 L 115.199219 19.199219 C 115.195312 8.59375 106.609375 0.00390625 96 0 L 32 0 C 21.390625 0.00390625 12.804688 8.59375 12.800781 19.199219 L 12.800781 108.800781 C 12.804688 119.40625 21.390625 127.996094 32 128 L 96 128 C 106.609375 127.996094 115.195312 119.40625 115.199219 108.800781 L 115.199219 19.199219 Z M 108.800781 19.199219 "/>
-<path style=" stroke:none;fill-rule:nonzero;fill:rgb(95.686275%,26.274511%,21.176471%);fill-opacity:1;" d="M 38.398438 32 L 38.464844 32 C 42 32 44.863281 29.136719 44.863281 25.601562 C 44.863281 22.066406 42 19.199219 38.464844 19.199219 L 38.398438 19.199219 C 34.863281 19.199219 32 22.066406 32 25.601562 C 32 29.136719 34.863281 32 38.398438 32 "/>
-<path style=" stroke:none;fill-rule:nonzero;fill:rgb(95.686275%,26.274511%,21.176471%);fill-opacity:1;" d="M 89.601562 108.800781 L 89.664062 108.800781 C 93.199219 108.800781 96.066406 105.933594 96.066406 102.398438 C 96.066406 98.863281 93.199219 96 89.664062 96 L 89.601562 96 C 86.066406 96 83.199219 98.863281 83.199219 102.398438 C 83.199219 105.933594 86.066406 108.800781 89.601562 108.800781 "/>
-<path style=" stroke:none;fill-rule:nonzero;fill:rgb(95.686275%,26.274511%,21.176471%);fill-opacity:1;" d="M 64 89.601562 L 69.121094 85.761719 L 52.800781 64 L 64 49.066406 L 75.199219 64 L 58.878906 85.761719 L 64 89.601562 L 69.121094 85.761719 L 64 89.601562 L 69.121094 93.441406 L 88.320312 67.839844 C 90.023438 65.566406 90.023438 62.433594 88.320312 60.160156 L 69.121094 34.558594 C 67.914062 32.953125 66.011719 32 64 32 C 61.988281 32 60.085938 32.953125 58.878906 34.558594 L 39.679688 60.160156 C 37.976562 62.433594 37.976562 65.566406 39.679688 67.839844 L 58.878906 93.441406 C 60.085938 95.046875 61.988281 96 64 96 C 66.011719 96 67.914062 95.046875 69.121094 93.441406 Z M 64 89.601562 "/>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+<title id="title">Deckit</title>
+<desc id="desc">Three overlapping playing cards with a luminous four-point star, representing modular card game systems.</desc>
+<defs>
+  <linearGradient id="back" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#1d3454"/><stop offset="1" stop-color="#0a1427"/>
+  </linearGradient>
+  <linearGradient id="face" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#fff7e7"/><stop offset="1" stop-color="#e4d4b9"/>
+  </linearGradient>
+  <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#6edbf7"/><stop offset="1" stop-color="#5b7cf2"/>
+  </linearGradient>
+</defs>
+<circle cx="128" cy="128" r="118" fill="#101a2e"/>
+<circle cx="128" cy="128" r="117" fill="none" stroke="#385777" stroke-width="2"/>
+<g transform="rotate(-20 95 127)">
+  <rect x="43" y="46" width="103" height="157" rx="11" fill="url(#back)" stroke="#74c7f2" stroke-width="7"/>
+  <rect x="57" y="60" width="75" height="129" rx="4" fill="none" stroke="#87c9e4" stroke-width="2" opacity=".64"/>
 </g>
+<g transform="rotate(17 161 124)">
+  <rect x="109" y="42" width="103" height="157" rx="11" fill="#263451" stroke="#f0b86d" stroke-width="7"/>
+  <rect x="123" y="56" width="75" height="129" rx="4" fill="none" stroke="#f0b86d" stroke-width="2" opacity=".62"/>
+</g>
+<g transform="rotate(-3 128 139)">
+  <rect x="76" y="66" width="104" height="150" rx="10" fill="url(#face)" stroke="#f4c37c" stroke-width="7"/>
+  <rect x="88" y="78" width="80" height="126" rx="4" fill="none" stroke="#aa7348" stroke-width="2.5" opacity=".82"/>
+  <path d="M128 102 C134 121 145 130 164 138 C145 145 134 156 128 176 C122 156 111 145 92 138 C111 130 122 121 128 102Z" fill="url(#shine)" stroke="#254c7c" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="128" cy="138" r="8" fill="#f9f3e7" stroke="#2f658c" stroke-width="2"/>
+</g>
+<path d="M43 214l4-10 4 10 10 4-10 4-4 10-4-10-10-4z" fill="#f4c37c"/>
+<path d="M211 28l3-8 3 8 8 3-8 3-3 8-3-8-8-3z" fill="#79d7f7"/>
 </svg>

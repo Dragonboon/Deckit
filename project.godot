@@ -10,7 +10,7 @@ config_version=5
 
 [Deckit]
 
-config/ninetailsrabbit.deckit/update_notification_enabled=true
+config/deckit/update_notification_enabled=true
 
 [animation]
 
@@ -19,7 +19,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Deckit"
-config/description="A framework in Godot to manage playing cards and create games of this kind in no time at all."
+config/description="Modular Godot toolkit for traditional, TCG, LCG and custom card games."
 config/version="1.0.0"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
@@ -34,7 +34,7 @@ window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/ninetailsrabbit.deckit/plugin.cfg")
+enabled=PackedStringArray("res://addons/deckit/plugin.cfg")
 
 [file_customization]
 

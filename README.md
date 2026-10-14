@@ -1,30 +1,85 @@
 <div align="center">
-	<img src="icon.svg" alt="Logo" width="160" height="160">
 
-<h3 align="center">PLUGIN NAME</h3>
+<img src="icon.svg" alt="Deckit: three overlapping playing cards and a blue star" width="128">
 
-  <p align="center">
-   PLUGIN DESCRIPTION
-	<br />
-	·
-	<a href="https://github.com/ninetailsrabbit/[PLUGIN]/issues/new?assignees=ninetailsrabbit&labels=%F0%9F%90%9B+bug&projects=&template=bug_report.md&title=">Report Bug</a>
-	·
-	<a href="https://github.com/ninetailsrabbit/[PLUGIN]/issues/new?assignees=ninetailsrabbit&labels=%E2%AD%90+feature&projects=&template=feature_request.md&title=">Request Features</a>
-  </p>
+# Deckit
+
+**Build card games, not card-game boilerplate.**
+
+Godot-native building blocks for traditional card games, deck builders, TCGs, LCGs and original game rules.
+
+[![Godot 4.7](https://img.shields.io/badge/Godot-4.7-478CBF?logo=godotengine&logoColor=white)](https://godotengine.org/)
+[![GDScript](https://img.shields.io/badge/GDScript-native-3E7BB6)](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/)
+[![MIT](https://img.shields.io/badge/License-MIT-2E8B57)](LICENSE)
+![Development](https://img.shields.io/badge/Status-early%20development-D99B41)
+
+[Quick start](#quick-start) · [Core API](docs/CORE_API.md) · [Legacy UI](#existing-ui-components) · [Contributing](CONTRIBUTING.md)
+
 </div>
 
-<br>
-<br>
+---
 
-- [📦 Installation](#-installation)
+Deckit is a **modular toolkit**, not a game-specific rules engine. Design reusable cards and move independent instances through zones; add rules only when your game needs them.
 
-# 📦 Installation
+## What you can use today
 
-1. [Download Latest Release](https://github.com/ninetailsrabbit/[PLUGIN]/releases/latest)
-2. Unpack the `addons/[PLUGIN]` folder into your `/addons` folder within the Godot project
-3. Enable this addon within the Godot settings: `Project > Project Settings > Plugins`
+| Building block | Purpose |
+| --- | --- |
+| `DeckitCardDefinition` | Data-driven card templates: names, art, tags, custom values |
+| `DeckitCardInstance` | Per-copy runtime state: owner, controller, face, counters |
+| `DeckitCardZone` | Ordered deck, hand, discard, battlefield or custom zone |
+| `DeckitCardAction` | Move a specific card between registered zones |
+| `DeckitCardRule` | Extend action eligibility for your game's own rules |
+| `DeckitGameState` | Execute allowed actions and observe success/failure |
 
-To better understand what branch to choose from for which Godot version, please refer to this table:
-|Godot Version|[PLUGIN] Branch|[PLUGIN] Version|
-|---|---|--|
-|[![GodotEngine](https://img.shields.io/badge/Godot_4.3.x_stable-blue?logo=godotengine&logoColor=white)](https://godotengine.org/)|`main`|`1.x`|
+The new **headless core** is separate from the existing visual components. Rules for turns, costs, combat and abilities remain game-owned and are **not yet implemented**.
+
+## Quick start
+
+1. Copy `addons/deckit/` into your Godot 4.7 project.
+2. Enable **Deckit** in **Project Settings → Plugins** to use the existing editor-facing UI nodes.
+3. Use the globally registered core types directly from scripts or Resources.
+
+```gdscript
+var card_data := DeckitCardDefinition.new()
+card_data.card_id = &"ace_of_spades"
+card_data.display_name = "Ace of Spades"
+
+var card := DeckitCardInstance.new(card_data, &"unique-card-1")
+var draw_zone := DeckitCardZone.new(&"draw")
+var hand_zone := DeckitCardZone.new(&"hand")
+draw_zone.add_card(card)
+
+var game := DeckitGameState.new()
+game.register_zone(draw_zone)
+game.register_zone(hand_zone)
+game.perform(DeckitCardAction.new(&"draw", &"hand", card.instance_id))
+```
+
+See **[Core API and rules](docs/CORE_API.md)** for practical usage, limitations, and reproducible headless tests.
+
+## Existing UI components
+
+Deckit still includes its original `DeckitDeck`, `DeckitCardHand`, `DeckitCardPile`, `DeckitPlayingCardUI`, `DeckitPlayingCard` and `DeckitDeckCreator` components. These support traditional French/Spanish suits, drag-and-drop, card stacks and hand layouts.
+
+They remain available while their integration and refactor proceed incrementally. **The new headless core does not automatically synchronize with these UI nodes yet.**
+
+## Roadmap
+
+- Bind the existing UI components to card instances and zones without hardcoded game rules.
+- Add effect/action pipelines, turn phases, deck-building validation and opt-in TCG/LCG modules.
+- Provide playable examples, persistence interfaces and further Godot 4.7 validation.
+- Keep multiplayer transport and game policy optional, never mandatory dependencies.
+
+## Validation
+
+```sh
+godot --headless --path . --import
+godot --headless --path . --script res://tests/headless/test_core.gd
+```
+
+These are **tests to run locally**, not a claim of completed Godot runtime validation.
+
+## Contributing and license
+
+See [Contributing](CONTRIBUTING.md) and [Security](SECURITY.md). Released under the [MIT License](LICENSE).
