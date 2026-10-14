@@ -51,7 +51,7 @@ enum SelectionMode {
 ## Set to 0 to allow infinite amount of cards
 @export var maximum_cards: int = 4:
 	set(value):
-		maximum_cards = maxi(1, value)
+		maximum_cards = maxi(0, value)
 ## Set to 0 to allow select all the cards
 @export var maximum_selected_cards: int = 4:
 	set(value):
@@ -183,7 +183,7 @@ func add_card(card: DeckitPlayingCardUI) -> void:
 func add_card_to_selected(card: DeckitPlayingCardUI) -> bool:
 	if current_cards.has(card) \
 		and not current_selected_cards.has(card) \
-			and maximum_selected_cards == 0 or current_selected_cards.size() < maximum_selected_cards:
+			and (maximum_selected_cards == 0 or current_selected_cards.size() < maximum_selected_cards):
 		current_selected_cards.append(card)
 		card.set_deferred("z_index", current_cards.size() + current_selected_cards.size() + 1)
 		
@@ -200,7 +200,7 @@ func remove_selected_card(card: DeckitPlayingCardUI) -> bool:
 		current_selected_cards.erase(card)
 		card.set_deferred("z_index", current_cards.size())
 		
-		if maximum_cards > 0 and current_selected_cards.size() == maximum_selected_cards:
+		if maximum_selected_cards > 0 and current_selected_cards.size() == maximum_selected_cards:
 			for non_selected_card: DeckitPlayingCardUI in unselected_cards():
 				non_selected_card.lock()
 				
@@ -245,7 +245,7 @@ func remove_random_card() -> DeckitPlayingCardUI:
 
 
 func remove_current_cards() -> void:
-	remove_cards(current_cards)
+	remove_cards(current_cards.duplicate())
 
 
 func card_can_be_added_to_hand(card: DeckitPlayingCardUI) -> bool:
@@ -263,7 +263,7 @@ func sort_cards_by_value_asc() -> void:
 		var previous_sortered_cards: Array[DeckitPlayingCardUI] = current_cards.duplicate()
 		
 		current_cards.sort_custom(
-			func(a: DeckitPlayingCardUI, b: DeckitPlayingCardUI): return a.value < b.value
+			func(a: DeckitPlayingCardUI, b: DeckitPlayingCardUI): return a.card.value < b.card.value
 			)
 		
 		update_hand_display_layout()
@@ -274,7 +274,7 @@ func sort_cards_by_value_desc() -> void:
 	if current_cards.size() > 1:
 		var previous_sortered_cards: Array[DeckitPlayingCardUI] = current_cards.duplicate()
 		
-		current_cards.sort_custom(func(a: DeckitPlayingCardUI, b: DeckitPlayingCardUI): return a.value > b.value)
+		current_cards.sort_custom(func(a: DeckitPlayingCardUI, b: DeckitPlayingCardUI): return a.card.value > b.card.value)
 		update_hand_display_layout()
 		
 		sorted_cards.emit(previous_sortered_cards, current_cards)
@@ -355,6 +355,8 @@ func calculate_irregular_fan_layout_rotation(card: DeckitPlayingCardUI) -> float
 
 func update_perfect_arc_fan_layout() -> void:
 	var cards_size: int = current_cards.size()
+	if cards_size == 0:
+		return
 	var card_spread = min(perfect_arc_angle_limit / cards_size, perfect_arc_max_card_spread_angle)
 	var current_angle = -(card_spread * (cards_size - 1)) / 2 - 90
 
@@ -451,6 +453,8 @@ func update_irregular_fan_preview_layout() -> void:
 func update_perfect_arc_fan_preview_layout() -> void:
 	if Engine.is_editor_hint():
 		var cards_size: int = get_child_count()
+		if cards_size == 0:
+			return
 		var card_spread = min(perfect_arc_angle_limit / cards_size, perfect_arc_max_card_spread_angle)
 		var current_angle = -(card_spread * (cards_size - 1)) / 2 - 90
 	
@@ -477,7 +481,7 @@ func on_added_card(card: DeckitPlayingCardUI) -> void:
 			card.draggable_2d.released.connect(on_card_released.bind(card))
 			
 	elif selection_mode_is_click():
-		card.draggable_2d.disable_drag()
+		card.draggable_2d.lock()
 		
 		if not card.draggable_2d.pressed.is_connected(on_card_pressed.bind(card)):
 			card.draggable_2d.pressed.connect(on_card_pressed.bind(card))

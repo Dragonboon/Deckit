@@ -147,7 +147,7 @@ func add_card(card: DeckitPlayingCardUI) -> void:
 		
 		card.position = Vector2.ZERO
 		card.z_as_relative = true
-		move_child(card, current_cards.size() + 1)
+		move_child(card, get_child_count() - 1)
 		
 		added_card.emit(card)
 		
@@ -179,7 +179,8 @@ func remove_card(card: DeckitPlayingCardUI) -> void:
 		
 
 func remove_cards(cards: Array[DeckitPlayingCardUI] = current_cards) -> void:
-	for card: DeckitPlayingCardUI in cards:
+	var snapshot: Array[DeckitPlayingCardUI] = cards.duplicate()
+	for card: DeckitPlayingCardUI in snapshot:
 		remove_card(card)
 
 	removed_cards.emit(cards)
@@ -218,9 +219,9 @@ func update_card_locks() -> void:
 func clear() -> void:
 	if is_empty():
 		return
-		
-	emptied.emit(current_cards)
-	remove_cards(current_cards)
+	var snapshot: Array[DeckitPlayingCardUI] = current_cards.duplicate()
+	emptied.emit(snapshot)
+	remove_cards(snapshot)
 
 #endregion
 
@@ -251,7 +252,7 @@ func middle_card() -> DeckitPlayingCardUI:
 
 
 func card_at_position(idx: int) -> DeckitPlayingCardUI:
-	var index: int = current_cards.find(idx)
+	var index: int = idx
 	
 	if index != -1:
 		return current_cards[index]
@@ -264,10 +265,7 @@ func is_empty() -> bool:
 
 
 func is_full() -> bool:
-	if maximum_cards_in_pile == 0:
-		return true
-		
-	return current_cards.size() == maximum_cards_in_pile
+	return maximum_cards_in_pile > 0 and current_cards.size() >= maximum_cards_in_pile
 
 
 func total_card_value() -> float:

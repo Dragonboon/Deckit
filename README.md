@@ -13,7 +13,7 @@ Godot-native building blocks for traditional card games, deck builders, TCGs, LC
 [![MIT](https://img.shields.io/badge/License-MIT-2E8B57)](LICENSE)
 ![Development](https://img.shields.io/badge/Status-early%20development-D99B41)
 
-[Quick start](#quick-start) · [Core API](docs/CORE_API.md) · [Legacy UI](#existing-ui-components) · [Contributing](CONTRIBUTING.md)
+[Quick start](#quick-start) · [Example labs](docs/EXAMPLE_LABS.md) · [Core API](docs/CORE_API.md) · [Legacy UI](#existing-ui-components) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -58,6 +58,10 @@ game.perform(DeckitCardAction.new(&"draw", &"hand", card.instance_id))
 
 See **[Core API and rules](docs/CORE_API.md)** for practical usage, limitations, and reproducible headless tests.
 
+## Explore three interactive labs
+
+Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, or **Legacy Visual Components**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
+
 ## Existing UI components
 
 Deckit still includes its original `DeckitDeck`, `DeckitCardHand`, `DeckitCardPile`, `DeckitPlayingCardUI`, `DeckitPlayingCard` and `DeckitDeckCreator` components. These support traditional French/Spanish suits, drag-and-drop, card stacks and hand layouts.
@@ -68,7 +72,7 @@ They remain available while their integration and refactor proceed incrementally
 
 - Bind the existing UI components to card instances and zones without hardcoded game rules.
 - Add effect/action pipelines, turn phases, deck-building validation and opt-in TCG/LCG modules.
-- Provide playable examples, persistence interfaces and further Godot 4.7 validation.
+- Extend the example lab catalog, add persistence interfaces and further Godot 4.7 validation.
 - Keep multiplayer transport and game policy optional, never mandatory dependencies.
 
 ## Validation
