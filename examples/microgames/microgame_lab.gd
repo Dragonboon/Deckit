@@ -74,7 +74,7 @@ func _play() -> void:
 		if selected.size() == 1 and selected[0] < cards.size():
 			ok = match_state.play(cards[selected[0]].instance_id)
 	if not ok and not match_state.finished:
-			status.text = "Move unavailable. Select a valid card or combination. " + match_state.last_message
+		status.text = "Move unavailable. Select a valid card or combination. " + match_state.last_message
 	_refresh()
 
 
