@@ -21,8 +21,8 @@ enum DisplayShadowModes {
 		if new_scale != card_area_scale:
 			card_area_scale = new_scale
 			
-			if card.front_texture:
-				card_area_collision.shape.size = (card.front_texture.get_size() * card_area_scale) * card_texture.scale
+			if card != null and card.front_texture != null and is_node_ready():
+				card_area_collision.shape.size = card.texture_size * card_area_scale * card_texture.scale
 			
 @export_category("Shadow")
 @export var display_shadow_mode: DisplayShadowModes = DisplayShadowModes.OnDrag
@@ -33,7 +33,7 @@ enum DisplayShadowModes {
 			shadow_vertical_depth = maxf(0.01, value)
 		
 		if is_inside_tree() and shadow:
-			shadow.position.y = card.position.y + shadow_vertical_depth
+			shadow.position.y = card_texture.position.y + shadow_vertical_depth
 		
 @export var shadow_horizontal_depth: float = 1.5:
 	set(value):
@@ -41,7 +41,7 @@ enum DisplayShadowModes {
 			shadow_horizontal_depth = maxf(0.01, value)
 			
 			if is_inside_tree() and shadow:
-				shadow.position.x = card.position.x + shadow_horizontal_depth
+				shadow.position.x = card_texture.position.x + shadow_horizontal_depth
 			
 @onready var card_texture: TextureRect = $CardTexture
 @onready var shadow: TextureRect = $Shadow
@@ -49,7 +49,7 @@ enum DisplayShadowModes {
 @onready var card_area: Area2D = $CardArea
 @onready var card_area_collision: CollisionShape2D = $CardArea/CollisionShape2D
 
-@onready var orientation: DeckitPlayingCard.Orientation = card.default_orientation:
+@onready var orientation: DeckitPlayingCard.Orientation = card.default_orientation if card != null else DeckitPlayingCard.Orientation.FaceUp:
 	set(value):
 		if orientation != value:
 			var previuos_orientation: DeckitPlayingCard.Orientation = orientation
@@ -82,6 +82,10 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	z_as_relative = false
+	if card == null or card.front_texture == null:
+		push_warning("DeckitPlayingCardUI needs a DeckitPlayingCard with a front texture before entering the scene tree.")
+		card_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		return
 
 	_prepare_card_texture()
 	_prepare_shadow()
@@ -202,8 +206,8 @@ func _prepare_card_area() -> void:
 	card_area.monitoring = true
 	card_area.priority = 1
 	
-	if card.front_texture:
-		card_area_collision.shape.size = (card.front_texture.get_size() * card_area_scale) * card_texture.scale
+	if card != null and card.front_texture != null:
+		card_area_collision.shape.size = card.texture_size * card_area_scale * card_texture.scale
 	
 #region Signal callbacks
 func on_drop_zone_entered(other_area: Area2D) -> void:

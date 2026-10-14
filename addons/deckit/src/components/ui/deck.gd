@@ -270,7 +270,8 @@ func recover_from_discard_pile(playing_card: DeckitPlayingCardUI) -> DeckitPlayi
 	
 	if card_to_recover != null:
 		add_card(card_to_recover)
-		recovered_card_from_discard_pile.emit(playing_card)
+		recovered_card_from_discard_pile.emit(card_to_recover)
+		return card_to_recover
 	return null
 #endregion
 

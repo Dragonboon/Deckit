@@ -168,7 +168,10 @@ func add_cards(cards: Array[DeckitPlayingCardUI]) -> void:
 func remove_card(card: DeckitPlayingCardUI) -> void:
 	if has_card(card):
 		card.z_as_relative = false
-		card.reparent(get_tree().current_scene)
+		var new_parent: Node = get_tree().current_scene
+		if new_parent == null:
+			new_parent = get_tree().root
+		card.reparent(new_parent)
 		
 		current_cards.erase(card)
 		removed_card.emit(card)

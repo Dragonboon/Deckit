@@ -54,45 +54,54 @@ func create_cards_as_resources(path: String) -> void:
 		return
 		
 	var image_format_regex = RegEx.new()
-	image_format_regex.compile("\\.(png|jpg|svg)$")
+	image_format_regex.compile("(?i)\\.(png|jpg|jpeg|webp|svg)$")
 
-	var backs: Array[CompressedTexture2D] = []
-	
-	for file: String in DeckitUtils.get_files_recursive(path, image_format_regex):
+	var backs: Array[Texture2D] = []
+	var images: Array = DeckitUtils.get_files_recursive(path, image_format_regex)
+	images.sort()
+	# Discover backs first; source-file iteration order is not guaranteed.
+	for file: String in images:
+		if file.get_base_dir().get_file().to_lower() == "backs":
+			var texture: Texture2D = ResourceLoader.load(file) as Texture2D
+			if texture != null:
+				backs.append(texture)
+	if backs.is_empty():
+		push_warning("DeckCreator: No card backs found. Cards will be face-up only until a back texture is assigned.")
+
+	for file: String in images:
 		var folder: String = file.get_base_dir()
-		var folder_name: String = folder.split("/")[-1].strip_edges().to_lower()
-		var file_name: String = file.get_basename().split("/")[-1] 
+		var folder_name: String = folder.get_file().to_lower()
+		var file_name: String = file.get_file().get_basename()
 		var resource_name: String = file_name + ".tres"
-		
-		var card: DeckitPlayingCard = DeckitPlayingCard.new()
-		card.id = file_name.to_snake_case()
+		var texture: Texture2D = ResourceLoader.load(file) as Texture2D
+		if texture == null:
+			push_warning("DeckCreator: Unable to load texture: %s" % file)
+			continue
+		var card := DeckitPlayingCard.new()
+		card.id = StringName(file_name.to_snake_case())
+		card.display_name = file_name.capitalize()
 		card.suit = folder_to_suit(folder_name)
-		card.default_orientation = DeckitPlayingCard.Orientation.FaceDown if card.is_back() else DeckitPlayingCard.Orientation.FaceUp
-	
+		card.default_orientation = DeckitPlayingCard.Orientation.FaceDown if folder_name == "backs" else DeckitPlayingCard.Orientation.FaceUp
 		if folder_name == "backs":
-			backs.append(ResourceLoader.load(file))
-			card.back_texture = backs.back()
+			card.back_texture = texture
 		else:
-			card.front_texture = ResourceLoader.load(file)
-			
+			card.front_texture = texture
+			if not backs.is_empty():
+				card.back_texture = backs.front()
 		if use_original_card_texture_size:
-			card.texture_size = backs[0].get_size() if folder_name == "backs" else card.front_texture.get_size()
+			card.texture_size = texture.get_size()
 		else:
-			card.texture_size = _calculate_scale_texture_based_on_target_size(
-			 	backs[0] if folder_name == "backs" else card.front_texture, 
-				target_size, 
-				texture_scale
-				)
-	
+			card.texture_size = target_size * texture_scale
 		if card.is_joker() or card.is_back():
 			card.value = 0.0
 			card.table_value = 0.0
 		else:
 			card.value = detect_card_value_from_filename(resource_name)
 			card.table_value = card.value
-		
-		ResourceSaver.save(card, "%s/%s" % [folder, resource_name])
-		
+		var saved: Error = ResourceSaver.save(card, "%s/%s" % [folder, resource_name])
+		if saved != OK:
+			push_warning("DeckCreator: Could not save %s (%s)" % [resource_name, error_string(saved)])
+
 	EditorInterface.get_resource_filesystem().scan()
 
 
@@ -108,7 +117,7 @@ func detect_card_value_from_filename(filename: String) -> float:
 	## This regular expressions detect words by any type of separators like ace-of_clubs or ace_of_diamond
 	## This is a second approach when the filename does not have a number that defines the card value
 	var card_name_regex:RegEx = RegEx.new()
-	card_name_regex.compile("(?<=^|[^a-zA-Z])[a-zA-Z]+(?=[^a-zA-Z]|$)")
+	card_name_regex.compile("[a-zA-Z]+")
 	
 	for regex_match: RegExMatch in card_name_regex.search_all(filename):
 		var word: String = regex_match.get_string().to_lower()

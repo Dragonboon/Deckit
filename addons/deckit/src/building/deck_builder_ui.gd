@@ -191,7 +191,11 @@ func _validate() -> void:
 	if deck == null or catalog == null:
 		return
 	var issues := DeckitDeckValidator.validate(deck, catalog, rules)
-	var valid := DeckitDeckValidator.is_valid(deck, catalog, rules)
+	var valid: bool = true
+	for issue in issues:
+		if issue == null or issue.severity == DeckitDeckIssue.Severity.ERROR:
+			valid = false
+			break
 	_issues.clear()
 	if issues.is_empty():
 		_issues.append_text("✓ No validation issues.")
@@ -239,12 +243,18 @@ func refresh() -> void:
 	if not is_node_ready():
 		return
 	_name.text = deck.deck_name if deck != null else ""
+	# Preserve selections when quantities change so repeated Add/Remove works.
+	var chosen_card: StringName = _selected_catalog_id()
+	var chosen_entry: Dictionary = _selected_deck_entry()
 	_filtered.clear()
 	_catalog_list.clear()
 	if catalog != null:
 		_filtered = catalog.search(_search.text)
-		for card in _filtered:
+		for index in range(_filtered.size()):
+			var card: DeckitCardDefinition = _filtered[index]
 			_catalog_list.add_item("%s [%s]" % [card.display_name, card.card_id])
+			if card.card_id == chosen_card:
+				_catalog_list.select(index)
 	_entry_keys.clear()
 	_deck_list.clear()
 	if deck != null:
@@ -255,6 +265,8 @@ func refresh() -> void:
 			_deck_list.add_item("%s ×%d (%s)" % [
 				entry.card_id, entry.quantity, entry.section_id
 			])
+			if entry.card_id == chosen_entry.get("id", &"") and entry.section_id == chosen_entry.get("section", &""):
+				_deck_list.select(_entry_keys.size() - 1)
 	_status.text = "Cards: %d | Unique entries: %d | Save: %s" % [
 		deck.total_cards() if deck != null else 0, _entry_keys.size(), save_path
 	]

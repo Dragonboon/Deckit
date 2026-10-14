@@ -1,109 +1,101 @@
 <div align="center">
-
-<img src="icon.svg" alt="Deckit: three overlapping playing cards and a blue star" width="128">
+  <img src="icon.svg" alt="Deckit — overlapping playing cards" width="116">
 
 # Deckit
 
 **Build card games, not card-game boilerplate.**
 
-Godot-native building blocks for traditional card games, deck builders, TCGs, LCGs and original game rules.
+Modular tools for cards, decks and gameplay in **Godot 4.7**.
 
 [![Godot 4.7](https://img.shields.io/badge/Godot-4.7-478CBF?logo=godotengine&logoColor=white)](https://godotengine.org/)
-[![GDScript](https://img.shields.io/badge/GDScript-native-3E7BB6)](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/)
-[![MIT](https://img.shields.io/badge/License-MIT-2E8B57)](LICENSE)
-![Development](https://img.shields.io/badge/Status-early%20development-D99B41)
+[![GDScript](https://img.shields.io/badge/GDScript-native-478CBF)](https://docs.godotengine.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-2ea44f)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-active%20development-efb44c)](docs/INTEGRATION_VALIDATION.md)
+[![CI](https://img.shields.io/badge/Tests-local%20headless-777777)](docs/INTEGRATION_VALIDATION.md)
 
-[Quick start](#quick-start) · [Example labs](docs/EXAMPLE_LABS.md) · [Core API](docs/CORE_API.md) · [Legacy UI](#existing-ui-components) · [Contributing](CONTRIBUTING.md)
+[Installation](#installation) · [Quick start](#quick-start) · [Features](#what-is-included) · [Examples](#try-the-examples) · [Guides](#documentation)
 
 </div>
 
 ---
 
-Deckit is a **modular toolkit**, not a game-specific rules engine. Design reusable cards and move independent instances through zones; add rules only when your game needs them.
+**Deckit** is a Godot add-on for making traditional card games, deck builders and original card-based games. You choose the rules. Deckit provides the reusable pieces: card data, zones, actions, deck editing, visual controls and optional systems for turns and events.
 
-## What you can use today
+You can use **one component on its own**, or combine several. Deckit does not include commercial card data, a mandatory game mode or a built-in multiplayer server.
 
-| Building block | Purpose |
-| --- | --- |
-| `DeckitCardDefinition` | Data-driven card templates: names, art, tags, custom values |
-| `DeckitCardInstance` | Per-copy runtime state: owner, controller, face, counters |
-| `DeckitCardZone` | Ordered deck, hand, discard, battlefield or custom zone |
-| `DeckitCardAction` | Move a specific card between registered zones |
-| `DeckitCardRule` | Extend action eligibility for your game's own rules |
-| `DeckitGameState` | Execute allowed actions and observe success/failure |
+## Installation
 
-The new **headless core** is separate from the legacy visual components; optional `DeckitCardView` and `DeckitZoneView` render it without enforcing game rules. Rules for turns, costs, combat and abilities remain game-owned and are **not yet implemented**.
+1. Download or clone this repository.
+2. Copy **`addons/deckit/`** into your game's project directory. Keep the folder structure intact.
+3. Open the project using **Godot 4.7** and allow the editor to import the assets.
+4. For the classic editor nodes (hands, piles and deck controls), enable **Deckit** under **Project → Project Settings → Plugins**.
+5. Create your own card definitions and connect only the modules you need. The data and headless systems use globally registered GDScript classes; they do not require a game scene.
+
+> **Start here:** The repository includes nine independent labs in `examples/labs/`. They are optional demonstrations, not files you need to ship with your game.
 
 ## Quick start
 
-1. Copy `addons/deckit/` into your Godot 4.7 project.
-2. Enable **Deckit** in **Project Settings → Plugins** to use the existing editor-facing UI nodes.
-3. Use the globally registered core types directly from scripts or Resources.
+This example creates a card, places it in a deck and moves it to a hand. It does not require an illustration, a scene or a particular set of rules.
 
 ```gdscript
-var card_data := DeckitCardDefinition.new()
-card_data.card_id = &"ace_of_spades"
-card_data.display_name = "Ace of Spades"
+var definition := DeckitCardDefinition.new()
+definition.card_id = &"sample"
+definition.display_name = "Sample Card"
 
-var card := DeckitCardInstance.new(card_data, &"unique-card-1")
-var draw_zone := DeckitCardZone.new(&"draw")
-var hand_zone := DeckitCardZone.new(&"hand")
-draw_zone.add_card(card)
+var copy := DeckitCardInstance.new(definition, &"copy-001")
+var draw_pile := DeckitCardZone.new(&"draw")
+var hand := DeckitCardZone.new(&"hand")
+draw_pile.add_card(copy)
 
 var game := DeckitGameState.new()
-game.register_zone(draw_zone)
-game.register_zone(hand_zone)
-game.perform(DeckitCardAction.new(&"draw", &"hand", card.instance_id))
+game.register_zone(draw_pile)
+game.register_zone(hand)
+assert(game.perform(DeckitCardAction.new(&"draw", &"hand", copy.instance_id)))
 ```
 
-See **[Core API and rules](docs/CORE_API.md)** for practical usage, limitations, and reproducible headless tests.
+A **definition** describes a kind of card; an **instance** is one copy during play; a **zone** is a place where copies live. The game state validates actions before moving cards.
 
-## Explore nine interactive labs
+## What is included
 
-Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, **Legacy Visual Components**, **State + Presentation**, **Targets & Effects**, **Event Queue**, **Turns & Phases**, **Priority Windows**, or **Deck Builder**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
+| Module | What it helps you do | Reference |
+| --- | --- | --- |
+| **Cards & zones** | Define cards, track independent copies and move them between draw piles, hands and custom areas. | [Core API](docs/CORE_API.md) |
+| **Presentation** | Show a card or whole zone; request actions without changing game rules in UI code. | [Presentation](docs/PRESENTATION.md) |
+| **Classic visual components** | Use card hands, card piles, dragging, fan layouts and French/Spanish playing-card utilities. | [Classic components](docs/CLASSIC_COMPONENTS.md) |
+| **Deck builder** | Search a catalog, edit card counts and sections, validate limits and save or load deck recipes as JSON. | [Deck builder](docs/DECK_BUILDER.md) |
+| **Actions & effects** | Select targets, validate conditions, change counters or card orientation, run action sequences. | [Actions](docs/ACTIONS_AND_EFFECTS.md) |
+| **Events & resolution** | Queue notifications, register responders, set priorities and enforce configurable resolution limits. | [Events](docs/EVENTS.md) |
+| **Turns & phases** | Configure participants, phases, rounds and pause/advance behavior. | [Turns](docs/TURNS_AND_PHASES.md) |
+| **Priority windows** | Stage player responses, pass priority and resolve proposed actions in LIFO/FIFO order. | [Priority windows](docs/PRIORITY_WINDOWS.md) |
 
-## Optional actions and effects
+**Modularity:** Turn management, priority windows, event queues and presentation are *opt-in*. A classic solitaire-style game does not need a TCG-like response window. Deck building works without an active match.
 
-The [`actions and effects`](docs/ACTIONS_AND_EFFECTS.md) layer provides target selection, conditional effects, card counters, face changes and stepwise action sequences. Sequences are **not transactional**: previous successful steps are not rolled back on a later failure.
+## Try the examples
 
-## Optional event resolution
+Open the repository itself as a Godot project and run:
 
-The [event queue](docs/EVENTS.md) supports opt-in event notifications, explicit resolution, priority-ordered responders, causal chain limits, cancellation, and bounded diagnostic traces. The queue does not introduce rules, automatic interrupts, rollback or networking.
+**`res://examples/labs/lab_hub.tscn`**
 
-## Optional turns and phases
+The nine labs cover card movement, rule checks, classic visuals, data-driven views, effects, event resolution, turns, priority and deck editing. See the [lab overview](docs/EXAMPLE_LABS.md) for a feature-by-feature map.
 
-The [turn manager](docs/TURNS_AND_PHASES.md) coordinates configurable participants and phases with pause/resume and transition hooks. Its event bridge is strictly opt-in and never imposes game-specific action legality or automatic progression.
+The labs are **outside the add-on folder** so they do not get bundled when you install only `addons/deckit/`.
 
-## Optional priority windows
+## Important boundaries
 
-The [priority window](docs/PRIORITY_WINDOWS.md) supports multiple participants passing, staging actions and resolving them in selectable LIFO/FIFO order. Turn blocking and lifecycle event reporting are opt-in, and all executed actions still go through the game state's rules.
+Deckit supplies building blocks, **not a finished game**. In particular:
 
-## Deck building toolkit
+- You supply cards, images, rules, card costs, actions allowed on each turn and any victory conditions.
+- The classic visual nodes and the newer headless model are **separate APIs**; there is no automatic sync between them yet.
+- Card backs in the UI do **not** secure hidden information. Multiplayer games must filter hidden data on the authoritative side.
+- Action sequences and event resolution are **not transactional**. They cannot roll back an earlier successful action.
+- The built-in deck editor creates editable recipes; your game must validate a deck before accepting it for play.
 
-The [deck builder](docs/DECK_BUILDER.md) provides catalogs, editable deck recipes, configurable constraints, validation, JSON import/export and an optional drag-free visual editor. It deliberately keeps deck recipes independent from runtime card instances and game-specific rules.
+## Documentation
 
-## Existing UI components
+[Core](docs/CORE_API.md) · [Classic components](docs/CLASSIC_COMPONENTS.md) · [Deck builder](docs/DECK_BUILDER.md) · [Actions](docs/ACTIONS_AND_EFFECTS.md) · [Presentation](docs/PRESENTATION.md) · [Events](docs/EVENTS.md) · [Turns](docs/TURNS_AND_PHASES.md) · [Priority](docs/PRIORITY_WINDOWS.md)
 
-Deckit still includes its original `DeckitDeck`, `DeckitCardHand`, `DeckitCardPile`, `DeckitPlayingCardUI`, `DeckitPlayingCard` and `DeckitDeckCreator` components. These support traditional French/Spanish suits, drag-and-drop, card stacks and hand layouts.
+[Run all local tests](docs/INTEGRATION_VALIDATION.md) · [Report a problem](https://github.com/sempitern0/Deckit/issues/new/choose) · [Contribute](CONTRIBUTING.md) · [Security](SECURITY.md)
 
-They remain available while their integration and refactor proceed incrementally. **The new headless core does not automatically synchronize with these UI nodes yet.**
+## License
 
-## Roadmap
-
-- Bind the existing UI components to card instances and zones without hardcoded game rules.
-- Expand reusable effects and optional TCG/LCG integrations.
-- Extend the example lab catalog, add persistence interfaces and further Godot 4.7 validation.
-- Keep multiplayer transport and game policy optional, never mandatory dependencies.
-
-## Validation
-
-```sh
-godot --headless --path . --import
-godot --headless --path . --script res://tests/headless/test_core.gd
-```
-
-For full cross-module regression coverage, see [Integration validation](docs/INTEGRATION_VALIDATION.md). These are **tests to run locally**, not a claim of completed Godot runtime validation.
-
-## Contributing and license
-
-See [Contributing](CONTRIBUTING.md) and [Security](SECURITY.md). Released under the [MIT License](LICENSE).
+Distributed under the [MIT License](LICENSE). The license retains the original 2024 copyright notice. Deckit is not affiliated with any commercial card game or publisher.

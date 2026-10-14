@@ -43,9 +43,9 @@ enum Orientation {
 ## When is not Vector2(0, 0) this size will override the original textures size
 @export var texture_size: Vector2 = Vector2.ZERO
 ## The front texture that displays the value of the card
-@export var front_texture: CompressedTexture2D
+@export var front_texture: Texture2D
 ## The back texture when is face down
-@export var back_texture: CompressedTexture2D
+@export var back_texture: Texture2D
 @export_group("Values")
 @export var suit: Suits
 ## The meta value from the card
