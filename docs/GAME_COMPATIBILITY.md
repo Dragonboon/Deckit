@@ -67,3 +67,7 @@ godot --headless --path . --script res://tests/headless/test_game_families.gd
 6. **Demonstrable reference scenarios:** runnable, original, noncopyright-specific microgames for each family.
 
 The design principle remains: **a generic Deckit primitive should be demonstrably useful in more than one card game**. Avoid embedding named-game rules in `addons/deckit/`.
+
+## Addendum — common utilities
+
+The optional services documented in [Common services](COMMON_SERVICES.md) now offer validated runtime deck materialization, round-robin dealing, configurable rank/suit comparison, simple patterns, per-participant numeric ledgers, atomic resource costs and threshold predicates. These improve foundations for traditional games, TCGs and LCGs, but **do not implement** game-specific rules (trick legality, poker hands, betting, combat, encounters, campaigns, authoritative multiplayer, save games). The original table above describes the pre-addendum baseline; any broader playability claim requires Godot execution and reference game scenarios.

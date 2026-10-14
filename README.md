@@ -63,6 +63,7 @@ A **definition** describes a kind of card; an **instance** is one copy during pl
 | **Presentation** | Show a card or whole zone; request actions without changing game rules in UI code. | [Presentation](docs/PRESENTATION.md) |
 | **Classic visual components** | Use card hands, card piles, dragging, fan layouts and French/Spanish playing-card utilities. | [Classic components](docs/CLASSIC_COMPONENTS.md) |
 | **Deck builder** | Search a catalog, edit card counts and sections, validate limits and save or load deck recipes as JSON. | [Deck builder](docs/DECK_BUILDER.md) |
+| **Setup, ranking & resources** | Turn deck recipes into runtime cards, deal through validated actions, compare cards and track scores or costs. | [Common services](docs/COMMON_SERVICES.md) |
 | **Actions & effects** | Select targets, validate conditions, change counters or card orientation, run action sequences. | [Actions](docs/ACTIONS_AND_EFFECTS.md) |
 | **Events & resolution** | Queue notifications, register responders, set priorities and enforce configurable resolution limits. | [Events](docs/EVENTS.md) |
 | **Turns & phases** | Configure participants, phases, rounds and pause/advance behavior. | [Turns](docs/TURNS_AND_PHASES.md) |
