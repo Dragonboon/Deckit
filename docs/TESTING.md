@@ -19,6 +19,7 @@ godot --headless --path . --import
 godot --headless --path . --script res://tests/headless/test_core.gd
 godot --headless --path . --script res://tests/headless/test_actions.gd
 godot --headless --path . --script res://tests/headless/test_presentation.gd
+godot --headless --path . --script res://tests/headless/test_lab_visuals.gd
 godot --headless --path . --script res://tests/headless/test_events.gd
 godot --headless --path . --script res://tests/headless/test_resolution.gd
 godot --headless --path . --script res://tests/headless/test_turns.gd

@@ -46,6 +46,7 @@ func _ready() -> void:
 		margin.add_theme_constant_override("margin_bottom", 12)
 		surface.add_child(margin)
 		var view := DeckitZoneView.new()
+		view.max_visible_cards = 3
 		margin.add_child(view)
 		view.card_requested.connect(_on_requested)
 		views.append(view)
@@ -79,7 +80,9 @@ func _reset() -> void:
 		definition.card_id = StringName("sample-%d" % (index % 3))
 		definition.display_name = "Card %s" % char(65 + index % 3)
 		definition.attributes = {"value": index % 3 + 1}
+		DeckitLabCardArt.decorate(definition)
 		var card := DeckitCardInstance.new(definition, StringName("copy-%02d" % (index + 1)))
+		card.face_up = true
 		card.owner_id = &"player-1"
 		card.controller_id = &"player-1"
 		draw_zone.add_card(card)

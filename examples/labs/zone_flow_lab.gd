@@ -8,6 +8,7 @@ var lists: Dictionary[StringName, ItemList] = {}
 var counts: Dictionary[StringName, Label] = {}
 var selection: Dictionary[StringName, StringName] = {}
 var status: Label
+var visual_zones: Array[DeckitZoneView] = []
 
 
 func _ready() -> void:
@@ -41,6 +42,10 @@ func _ready() -> void:
 		item_list.item_selected.connect(_on_selected.bind(zone_id))
 		panel.add_child(item_list)
 		lists[zone_id] = item_list
+	var visual_row := DeckitLabCardArt.zone_row(page)
+	for id in ZONE_IDS:
+		var view := DeckitLabCardArt.zone_panel(visual_row, game, id, &"demo", 2)
+		visual_zones.append(view)
 	status = DeckitLabUI.info(page, "")
 	game.action_applied.connect(_on_applied)
 	game.action_rejected.connect(_on_rejected)
@@ -60,16 +65,20 @@ func _reset() -> void:
 		definition.display_name = "Sample %s" % char(65 + index)
 		definition.tags = PackedStringArray(["demo", "group-%d" % index])
 		definition.attributes = {"cost": index, "power": index + 1}
+		DeckitLabCardArt.decorate(definition)
 		definitions.append(definition)
 	for index in range(9):
 		var card := DeckitCardInstance.new(
 			definitions[index % definitions.size()],
 			StringName("instance-%02d" % (index + 1))
 		)
+		card.face_up = true
 		card.owner_id = &"demo"
 		card.controller_id = &"demo"
 		game.get_zone(&"draw").add_card(card)
 	status.text = "Reset: 9 unique card instances share 3 definitions. Hand capacity: 5."
+	for index in range(visual_zones.size()):
+		visual_zones[index].bind(game, ZONE_IDS[index], &"demo")
 	_refresh()
 
 
@@ -146,6 +155,8 @@ func _on_rejected(action: DeckitCardAction) -> void:
 
 
 func _refresh() -> void:
+	for view in visual_zones:
+		view.refresh()
 	for zone_id in ZONE_IDS:
 		var zone := game.get_zone(zone_id)
 		var display := lists[zone_id]

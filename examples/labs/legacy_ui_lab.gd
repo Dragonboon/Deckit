@@ -1,8 +1,8 @@
 extends Control
 
 const CARD_SCENE: PackedScene = preload("res://addons/deckit/src/components/ui/playing_card_ui.tscn")
-const CARD_IMAGE: Texture2D = preload("res://addons/deckit/assets/playing_card.svg")
-const CARD_BACK: Texture2D = preload("res://addons/deckit/assets/deck.svg")
+
+
 
 var hand: DeckitCardHand
 var pile: DeckitCardPile
@@ -64,8 +64,8 @@ func _make_card() -> DeckitPlayingCardUI:
 	data.display_name = "Sample %d" % cards_created
 	data.value = float(cards_created % 7 + 1)
 	data.suit = DeckitPlayingCard.Suits.Heart
-	data.front_texture = CARD_IMAGE
-	data.back_texture = CARD_BACK
+	data.front_texture = DeckitLabCardArt.front()
+	data.back_texture = DeckitLabCardArt.back()
 	data.texture_size = Vector2(72, 100)
 	var visual: DeckitPlayingCardUI = CARD_SCENE.instantiate()
 	visual.card = data

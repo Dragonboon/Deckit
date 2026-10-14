@@ -7,6 +7,7 @@ var source := DeckitCardZone.new(&"hand", &"demo")
 var table := DeckitCardZone.new(&"table", &"demo")
 var status: Label
 var cards_list: ItemList
+var visual: DeckitZoneView
 var condition := DeckitTagCondition.new()
 
 
@@ -25,6 +26,11 @@ func _ready() -> void:
 	cards_list.custom_minimum_size = Vector2(560, 200)
 	cards_list.item_selected.connect(_select)
 	page.add_child(cards_list)
+	visual = DeckitLabCardArt.zone_panel(page, game, &"hand", &"demo", 4)
+	visual.card_requested.connect(func(_zone: StringName, id: StringName) -> void:
+		selected.clear()
+		selected.select(game, &"hand", id)
+	)
 	status = DeckitLabUI.info(page, "")
 	game.action_applied.connect(_on_applied)
 	game.action_rejected.connect(_on_rejected)
@@ -44,8 +50,11 @@ func _reset() -> void:
 		definition.card_id = StringName("demo-%d" % index)
 		definition.display_name = "Sample %d" % (index + 1)
 		definition.tags = PackedStringArray(["eligible"] if index != 1 else ["restricted"])
+		DeckitLabCardArt.decorate(definition)
 		var card := DeckitCardInstance.new(definition, StringName("instance-%d" % index))
+		card.face_up = true
 		source.add_card(card)
+	visual.bind(game, &"hand", &"demo")
 	status.text = "Select a card. The middle card lacks the eligible tag."
 	_refresh()
 
@@ -118,6 +127,7 @@ func _on_rejected(action: DeckitCardAction) -> void:
 
 
 func _refresh() -> void:
+	visual.refresh()
 	cards_list.clear()
 	for index in range(source.size()):
 		var card := source.cards[index]

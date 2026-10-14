@@ -5,6 +5,8 @@ extends Control
 
 var match_state: RefCounted
 var cards_list: ItemList
+var card_images: HFlowContainer
+var chosen_ids: Array[StringName] = []
 var status: Label
 var stats: Label
 
@@ -22,9 +24,13 @@ func _ready() -> void:
 		DeckitLabUI.button(controls, "End turn", _end_turn)
 	DeckitLabUI.button(controls, "Restart", _reset)
 	DeckitLabUI.heading(page, "Available cards")
+	DeckitLabUI.heading(page, "Cards (click to select)")
+	card_images = DeckitLabCardArt.zone_row(page)
 	cards_list = ItemList.new()
-	cards_list.custom_minimum_size = Vector2(500, 245)
+	cards_list.custom_minimum_size = Vector2(500, 100)
 	cards_list.select_mode = ItemList.SELECT_MULTI if scenario == 1 else ItemList.SELECT_SINGLE
+	cards_list.item_selected.connect(_selected_index)
+	cards_list.multi_selected.connect(_multi_selected)
 	cards_list.tooltip_text = "Select a card using the mouse or keyboard. For French Melds select three."
 	page.add_child(cards_list)
 	stats = DeckitLabUI.info(page, "")
@@ -59,9 +65,28 @@ func _cards() -> Array[DeckitCardInstance]:
 	return []
 
 
-func _play() -> void:
-	var selected: PackedInt32Array = cards_list.get_selected_items()
+func _selected_index(index: int) -> void:
+	if scenario != 1:
+		chosen_ids.clear()
+		var cards: Array[DeckitCardInstance] = _cards()
+		if index >= 0 and index < cards.size():
+			chosen_ids.append(cards[index].instance_id)
+
+
+func _multi_selected(index: int, selected: bool) -> void:
+	if scenario != 1:
+		return
 	var cards: Array[DeckitCardInstance] = _cards()
+	if index >= 0 and index < cards.size():
+		if selected and not chosen_ids.has(cards[index].instance_id):
+			chosen_ids.append(cards[index].instance_id)
+		elif not selected:
+			chosen_ids.erase(cards[index].instance_id)
+
+
+func _play() -> void:
+	var cards: Array[DeckitCardInstance] = _cards()
+	var selected: PackedInt32Array = cards_list.get_selected_items()
 	var ok: bool = false
 	if scenario == 1:
 		if selected.size() == 3:
@@ -85,8 +110,15 @@ func _end_turn() -> void:
 
 
 func _refresh() -> void:
+	chosen_ids.clear()
+	for child in card_images.get_children():
+		card_images.remove_child(child)
+		child.queue_free()
 	cards_list.clear()
 	for card: DeckitCardInstance in _cards():
+		DeckitLabCardArt.decorate(card.definition)
+		var view := DeckitLabCardArt.card_button(card_images, card, true)
+		view.card_requested.connect(_on_card_requested)
 		var extra: String = ""
 		if scenario == 2:
 			extra = " (cost: %d)" % int(card.get_attribute(&"cost", 0))
@@ -114,3 +146,20 @@ func _refresh() -> void:
 				match_state.ledger.get_value(&"rival", &"health"),
 				" | FINISHED" if match_state.finished else ""
 			]
+
+
+func _on_card_requested(instance_id: StringName) -> void:
+	var cards: Array[DeckitCardInstance] = _cards()
+	for index in range(cards.size()):
+		if cards[index].instance_id == instance_id:
+			if scenario == 1:
+				var is_selected: bool = cards_list.is_selected(index)
+				if is_selected:
+					cards_list.deselect(index)
+				else:
+					cards_list.select(index, false)
+				_multi_selected(index, not is_selected)
+			else:
+				cards_list.select(index)
+				_selected_index(index)
+			return

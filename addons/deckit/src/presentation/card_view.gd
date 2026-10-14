@@ -1,5 +1,5 @@
-## A small, game-agnostic card button. The view never changes card state.
-## Caller decides whether card identity may be revealed.
+## Game-neutral card button. Never directly edits the represented card.
+## Caller controls reveal_front and is responsible for hidden data security.
 @icon("res://addons/deckit/assets/playing_card.svg")
 class_name DeckitCardView extends Button
 
@@ -10,15 +10,14 @@ var front_revealed: bool = false
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(104, 138)
-	tooltip_text = "Card. Press Enter or Space to select."
+	custom_minimum_size = Vector2(112, 158)
 	focus_mode = Control.FOCUS_ALL
+	expand_icon = true
+	icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	pressed.connect(_on_pressed)
 	refresh()
 
 
-## Bind a runtime card; setting reveal_front=true does not grant data access.
-## The host must still protect hidden data when networking.
 func display_card(card: DeckitCardInstance, reveal_front: bool) -> void:
 	card_instance = card
 	front_revealed = reveal_front
@@ -47,11 +46,13 @@ func refresh() -> void:
 				labels.append("%s: %d" % [key, int(card_instance.counters[key])])
 			text += "\n" + ", ".join(labels)
 		icon = definition.front_texture
-		tooltip_text = label
+		tooltip_text = "Face up: %s. Activate to select." % label
 	else:
 		text = "Face down"
 		icon = definition.back_texture if definition != null else null
-		tooltip_text = "Concealed card"
+		tooltip_text = "Face-down card. Activate to select."
+	if not is_node_ready():
+		return
 
 
 func _on_pressed() -> void:

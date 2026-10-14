@@ -10,6 +10,8 @@ var zone_id: StringName = &""
 var viewer_id: StringName = &""
 var reveal_owned_cards: bool = true
 var show_card_count: bool = true
+## 0 displays all cards; positive values display only the top N cards.
+var max_visible_cards: int = 0
 
 var _heading: Label
 var _cards_row: HFlowContainer
@@ -57,7 +59,9 @@ func refresh() -> void:
 		_heading.text += " (%d)" % zone.size()
 
 	var active: Dictionary = {}
-	for index in range(zone.cards.size()):
+	var first_index: int = maxi(0, zone.cards.size() - max_visible_cards) if max_visible_cards > 0 else 0
+	var visible_index: int = 0
+	for index in range(first_index, zone.cards.size()):
 		var card: DeckitCardInstance = zone.cards[index]
 		if card == null:
 			continue
@@ -69,7 +73,8 @@ func refresh() -> void:
 			card_view.card_requested.connect(_on_card_requested)
 			_views[key] = card_view
 		# Keep order consistent with the zone, including after shuffles.
-		_cards_row.move_child(card_view, index)
+		_cards_row.move_child(card_view, visible_index)
+		visible_index += 1
 		card_view.display_card(card, _can_reveal(zone, card))
 		active[key] = true
 

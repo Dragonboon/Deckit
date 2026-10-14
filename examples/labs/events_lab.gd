@@ -9,6 +9,8 @@ var source := DeckitCardZone.new(&"hand")
 var destination := DeckitCardZone.new(&"table")
 var status: Label
 var history: Label
+var card_views: Array[DeckitZoneView] = []
+var event_cards: VBoxContainer
 
 
 func _ready() -> void:
@@ -24,6 +26,12 @@ func _ready() -> void:
 	DeckitLabUI.button(controls, "Cancel pending", _cancel_pending)
 	DeckitLabUI.button(controls, "Stop on rejection", _toggle_policy)
 	DeckitLabUI.button(controls, "Reset", _reset)
+	var zone_row := DeckitLabCardArt.zone_row(page)
+	card_views.append(DeckitLabCardArt.zone_panel(zone_row, game, &"hand"))
+	card_views.append(DeckitLabCardArt.zone_panel(zone_row, game, &"table"))
+	DeckitLabUI.heading(page, "Event reactions")
+	event_cards = VBoxContainer.new()
+	page.add_child(event_cards)
 	status = DeckitLabUI.info(page, "")
 	history = DeckitLabUI.info(page, "")
 	queue.event_queued.connect(_on_queued)
@@ -48,8 +56,15 @@ func _reset() -> void:
 	var definition := DeckitCardDefinition.new()
 	definition.card_id = &"generic"
 	definition.display_name = "Generic card"
-	source.add_card(DeckitCardInstance.new(definition, &"unique-1"))
+	DeckitLabCardArt.decorate(definition)
+	var card := DeckitCardInstance.new(definition, &"unique-1")
+	card.face_up = true
+	source.add_card(card)
+	card_views[0].bind(game, &"hand")
+	card_views[1].bind(game, &"table")
 	history.text = "Resolution log:"
+	for child in event_cards.get_children():
+		child.queue_free()
 	_update()
 
 
@@ -89,11 +104,13 @@ func _publish_custom() -> void:
 
 
 func _on_queued(event: DeckitGameEvent) -> void:
+	_add_reaction(event, "QUEUED")
 	_log("QUEUED %s (priority %d)" % [event.event_type, event.priority])
 	_update()
 
 
 func _on_processed(event: DeckitGameEvent, applied: int, rejected: int) -> void:
+	_add_reaction(event, "RESOLVED")
 	_log("PROCESSED %s: %d applied, %d rejected" % [event.event_type, applied, rejected])
 	_update()
 
@@ -114,3 +131,20 @@ func _update() -> void:
 		source.size(), destination.size(), queue.pending_count(),
 		card.get_counter(&"arrival") if card != null else 0
 	]
+
+
+func _add_reaction(event: DeckitGameEvent, phase: String) -> void:
+	if event_cards.get_child_count() >= 5:
+		var oldest := event_cards.get_child(0)
+		event_cards.remove_child(oldest)
+		oldest.queue_free()
+	var row := HBoxContainer.new()
+	event_cards.add_child(row)
+	var label := DeckitLabUI.info(row, "%s: %s" % [phase, event.event_type])
+	label.custom_minimum_size.x = 235
+	var card: DeckitCardInstance = destination.find_by_id(event.card_instance_id)
+	if card == null:
+		card = source.find_by_id(event.card_instance_id)
+	if card != null:
+		var view := DeckitLabCardArt.card_button(row, card, true)
+		view.disabled = true
