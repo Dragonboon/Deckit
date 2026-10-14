@@ -1,6 +1,5 @@
-## Optional renderer for one registered DeckitCardZone.
-## Renders card views and emits intent, but never mutates game state.
-## Own-hand disclosure is opt-in through viewer_id; hidden zones stay hidden.
+## Optional renderer for one DeckitCardZone.
+## Reuses card buttons on refresh to preserve focus and reduce allocations.
 @icon("res://addons/deckit/assets/card_pile.svg")
 class_name DeckitZoneView extends VBoxContainer
 
@@ -14,6 +13,7 @@ var show_card_count: bool = true
 
 var _heading: Label
 var _cards_row: HFlowContainer
+var _views: Dictionary = {}
 
 
 func _ready() -> void:
@@ -21,7 +21,6 @@ func _ready() -> void:
 	_heading = Label.new()
 	_heading.add_theme_font_size_override("font_size", 18)
 	add_child(_heading)
-
 	_cards_row = HFlowContainer.new()
 	_cards_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_cards_row.add_theme_constant_override("h_separation", 8)
@@ -30,7 +29,6 @@ func _ready() -> void:
 	refresh()
 
 
-## May be called before or after adding this node to the scene tree.
 func bind(state: DeckitGameState, target_zone_id: StringName, player_id: StringName = &"") -> void:
 	if game_state != null and game_state.action_applied.is_connected(_on_action_applied):
 		game_state.action_applied.disconnect(_on_action_applied)
@@ -50,37 +48,48 @@ func set_viewer(player_id: StringName) -> void:
 func refresh() -> void:
 	if not is_node_ready():
 		return
-	for child in _cards_row.get_children():
-		_cards_row.remove_child(child)
-		child.queue_free()
-
-	var zone: DeckitCardZone = null
-	if game_state != null:
-		zone = game_state.get_zone(zone_id)
+	var zone: DeckitCardZone = game_state.get_zone(zone_id) if game_state != null else null
+	_heading.text = "Zone unavailable: %s" % String(zone_id) if zone == null else String(zone_id).capitalize()
 	if zone == null:
-		_heading.text = "Zone unavailable: %s" % String(zone_id)
+		_clear_views()
 		return
-
-	_heading.text = String(zone_id).capitalize()
 	if show_card_count:
 		_heading.text += " (%d)" % zone.size()
 
-	for card: DeckitCardInstance in zone.cards:
-		var card_view := DeckitCardView.new()
-		_cards_row.add_child(card_view)
+	var active: Dictionary = {}
+	for index in range(zone.cards.size()):
+		var card: DeckitCardInstance = zone.cards[index]
+		if card == null:
+			continue
+		var key: StringName = card.instance_id
+		var card_view: DeckitCardView = _views.get(key, null)
+		if card_view == null:
+			card_view = DeckitCardView.new()
+			_cards_row.add_child(card_view)
+			card_view.card_requested.connect(_on_card_requested)
+			_views[key] = card_view
+		# Keep order consistent with the zone, including after shuffles.
+		_cards_row.move_child(card_view, index)
 		card_view.display_card(card, _can_reveal(zone, card))
-		card_view.card_requested.connect(_on_card_requested)
+		active[key] = true
+
+	for key in _views.keys():
+		if not active.has(key):
+			var removed: DeckitCardView = _views[key]
+			_cards_row.remove_child(removed)
+			removed.queue_free()
+			_views.erase(key)
+
+
+func _clear_views() -> void:
+	for view: DeckitCardView in _views.values():
+		_cards_row.remove_child(view)
+		view.queue_free()
+	_views.clear()
 
 
 func get_card_view(instance_id: StringName) -> DeckitCardView:
-	if not is_node_ready():
-		return null
-	for child in _cards_row.get_children():
-		var card_view := child as DeckitCardView
-		if card_view != null and card_view.card_instance != null:
-			if card_view.card_instance.instance_id == instance_id:
-				return card_view
-	return null
+	return _views.get(instance_id, null) if is_node_ready() else null
 
 
 func _can_reveal(zone: DeckitCardZone, card: DeckitCardInstance) -> bool:

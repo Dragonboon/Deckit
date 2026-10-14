@@ -17,6 +17,7 @@ godot --headless --path . --script res://tests/headless/test_deck_builder.gd
 godot --headless --path . --script res://tests/headless/test_game_families.gd
 godot --headless --path . --script res://tests/headless/test_common_services.gd
 godot --headless --path . --script res://tests/headless/test_microgames.gd
+godot --headless --path . --script res://tests/headless/test_maintenance.gd
 ```
 
 ## Module boundaries

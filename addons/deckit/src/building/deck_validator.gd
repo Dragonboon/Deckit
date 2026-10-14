@@ -15,6 +15,14 @@ static func validate(
 	for message in catalog.invalid_ids():
 		issues.append(DeckitDeckIssue.new(&"invalid_catalog", message))
 
+	# Build a local index once. Large catalogs should not be scanned for
+	# every deck entry or for each combined copy-limit check.
+	# The first definition wins, matching CardCatalog.find_card().
+	var definitions: Dictionary = {}
+	for candidate: DeckitCardDefinition in catalog.cards:
+		if candidate != null and candidate.card_id != &"" and not definitions.has(candidate.card_id):
+			definitions[candidate.card_id] = candidate
+
 	var seen_entries: Dictionary = {}
 	var count_by_id: Dictionary = {}
 	for entry in deck.entries:
@@ -29,7 +37,7 @@ static func validate(
 			issues.append(DeckitDeckIssue.new(&"invalid_quantity", "Quantity must be between 1 and 9999.", entry.card_id, entry.section_id))
 			continue
 		count_by_id[entry.card_id] = int(count_by_id.get(entry.card_id, 0)) + entry.quantity
-		var definition: DeckitCardDefinition = catalog.find_card(entry.card_id)
+		var definition: DeckitCardDefinition = definitions.get(entry.card_id, null)
 		if definition == null:
 			issues.append(DeckitDeckIssue.new(&"unknown_card", "Card ID is missing from the catalog.", entry.card_id, entry.section_id))
 			continue
@@ -49,7 +57,7 @@ static func validate(
 					issues.append(DeckitDeckIssue.new(&"disallowed_tag", "Card has none of the allowed tags.", entry.card_id, entry.section_id))
 
 	for id in count_by_id:
-		var definition: DeckitCardDefinition = catalog.find_card(id)
+		var definition: DeckitCardDefinition = definitions.get(id, null)
 		var effective_limit: int = 0
 		if rules != null and rules.default_copy_limit > 0:
 			effective_limit = rules.default_copy_limit

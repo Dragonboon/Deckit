@@ -124,7 +124,7 @@ func change_empty_texture_size(new_size: Vector2) -> void:
 
 #region Features
 func card_can_be_added_to_pile(playing_card: DeckitPlayingCardUI) -> bool:
-	if has_card(playing_card):
+	if playing_card == null or playing_card.card == null or has_card(playing_card):
 		return false
 		
 	var is_allowed_spanish_card: bool = playing_card.card.is_spanish() and playing_card.card.suit in spanish_suits_allowed
@@ -186,7 +186,7 @@ func remove_cards(cards: Array[DeckitPlayingCardUI] = current_cards) -> void:
 	for card: DeckitPlayingCardUI in snapshot:
 		remove_card(card)
 
-	removed_cards.emit(cards)
+	removed_cards.emit(snapshot)
 	
 
 func remove_card_at_position(idx: int) -> void:
@@ -255,11 +255,8 @@ func middle_card() -> DeckitPlayingCardUI:
 
 
 func card_at_position(idx: int) -> DeckitPlayingCardUI:
-	var index: int = idx
-	
-	if index != -1:
-		return current_cards[index]
-		
+	if idx >= 0 and idx < current_cards.size():
+		return current_cards[idx]
 	return null
 
 

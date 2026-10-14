@@ -24,33 +24,33 @@ class DeckRecord:
 		type = deck_type
 		
 		## Common suits for all decks
-		for back: DeckitPlayingCard in DeckitUtils.get_resource_files(path + "backs"):
+		for back: DeckitPlayingCard in DeckitUtils.get_resource_files(path.path_join("backs")):
 			backs.append(back)
 			
-		for joker: DeckitPlayingCard in DeckitUtils.get_resource_files(path + "jokers"):
+		for joker: DeckitPlayingCard in DeckitUtils.get_resource_files(path.path_join("jokers")):
 			jokers.append(joker)
 
-		for club: DeckitPlayingCard in DeckitUtils.get_resource_files(path + "clubs"):
+		for club: DeckitPlayingCard in DeckitUtils.get_resource_files(path.path_join("clubs")):
 			clubs.append(club)
 			
 		if is_french():
-			for diamond: DeckitPlayingCard in DeckitUtils.get_resource_files(path + "diamonds"):
+			for diamond: DeckitPlayingCard in DeckitUtils.get_resource_files(path.path_join("diamonds")):
 				diamonds.append(diamond)
 				
-			for heart: DeckitPlayingCard in DeckitUtils.get_resource_files(path + "hearts"):
+			for heart: DeckitPlayingCard in DeckitUtils.get_resource_files(path.path_join("hearts")):
 				hearts.append(heart)
 				
-			for spade: DeckitPlayingCard in DeckitUtils.get_resource_files(path + "spades"):
+			for spade: DeckitPlayingCard in DeckitUtils.get_resource_files(path.path_join("spades")):
 				spades.append(spade)
 		
 		elif is_spanish():
-			for cup: DeckitPlayingCard in DeckitUtils.get_resource_files(path + "cups"):
+			for cup: DeckitPlayingCard in DeckitUtils.get_resource_files(path.path_join("cups")):
 				cups.append(cup)
 				
-			for gold: DeckitPlayingCard in DeckitUtils.get_resource_files(path + "golds"):
+			for gold: DeckitPlayingCard in DeckitUtils.get_resource_files(path.path_join("golds")):
 				golds.append(gold)
 				
-			for sword: DeckitPlayingCard in DeckitUtils.get_resource_files(path + "swords"):
+			for sword: DeckitPlayingCard in DeckitUtils.get_resource_files(path.path_join("swords")):
 				swords.append(sword)
 
 	

@@ -33,6 +33,9 @@ static func page(root: Control, page_heading: String, summary: String) -> VBoxCo
 
 	var home := Button.new()
 	home.text = "← All labs"
+	home.custom_minimum_size.y = 34
+	home.tooltip_text = "Return to the list of examples"
+	home.focus_mode = Control.FOCUS_ALL
 	home.pressed.connect(func() -> void: root.get_tree().change_scene_to_file(HUB))
 	column.add_child(home)
 	return column
@@ -49,6 +52,9 @@ static func heading(parent: Node, value: String) -> Label:
 static func button(parent: Node, value: String, callback: Callable) -> Button:
 	var result := Button.new()
 	result.text = value
+	result.custom_minimum_size.y = 34
+	result.tooltip_text = value
+	result.focus_mode = Control.FOCUS_ALL
 	result.pressed.connect(callback)
 	parent.add_child(result)
 	return result

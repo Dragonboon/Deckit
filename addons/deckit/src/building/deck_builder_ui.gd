@@ -45,7 +45,8 @@ func _ready() -> void:
 	_search = LineEdit.new()
 	_search.placeholder_text = "Search card ID, name or tag…"
 	_search.clear_button_enabled = true
-	_search.text_changed.connect(func(_value: String) -> void: refresh())
+	_search.tooltip_text = "Filter the card catalog by ID, name or tag."
+	_search.text_changed.connect(func(_value: String) -> void: _refresh_catalog())
 	add_child(_search)
 
 	var columns := HBoxContainer.new()
@@ -58,7 +59,8 @@ func _ready() -> void:
 	left_title.text = "Catalog (select a card)"
 	left.add_child(left_title)
 	_catalog_list = ItemList.new()
-	_catalog_list.custom_minimum_size = Vector2(240, 170)
+	_catalog_list.custom_minimum_size = Vector2(220, 170)
+	_catalog_list.tooltip_text = "Choose a card; press Add 1 or Add 4 to include copies."
 	_catalog_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	left.add_child(_catalog_list)
 	var catalog_actions := HFlowContainer.new()
@@ -73,7 +75,8 @@ func _ready() -> void:
 	right_title.text = "Deck entries (select to edit)"
 	right.add_child(right_title)
 	_deck_list = ItemList.new()
-	_deck_list.custom_minimum_size = Vector2(240, 170)
+	_deck_list.custom_minimum_size = Vector2(220, 170)
+	_deck_list.tooltip_text = "Choose a deck entry, then remove one copy or all copies."
 	right.add_child(_deck_list)
 	var deck_actions := HFlowContainer.new()
 	right.add_child(deck_actions)
@@ -88,10 +91,13 @@ func _ready() -> void:
 	_button(operations, "Duplicate", _duplicate)
 	_status = Label.new()
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_status.tooltip_text = "Current deck totals and save location."
 	add_child(_status)
 	_issues = RichTextLabel.new()
 	_issues.custom_minimum_size.y = 100
 	_issues.fit_content = false
+	_issues.scroll_active = true
+	_issues.tooltip_text = "Deck validation results. Errors must be corrected before play."
 	add_child(_issues)
 	refresh()
 
@@ -106,6 +112,9 @@ func setup(new_catalog: DeckitCardCatalog, new_deck: DeckitDeckList, new_rules: 
 func _button(parent: Node, title: String, callback: Callable) -> void:
 	var control := Button.new()
 	control.text = title
+	control.custom_minimum_size.y = 34
+	control.tooltip_text = title
+	control.focus_mode = Control.FOCUS_ALL
 	control.pressed.connect(callback)
 	parent.add_child(control)
 
@@ -246,15 +255,7 @@ func refresh() -> void:
 	# Preserve selections when quantities change so repeated Add/Remove works.
 	var chosen_card: StringName = _selected_catalog_id()
 	var chosen_entry: Dictionary = _selected_deck_entry()
-	_filtered.clear()
-	_catalog_list.clear()
-	if catalog != null:
-		_filtered = catalog.search(_search.text)
-		for index in range(_filtered.size()):
-			var card: DeckitCardDefinition = _filtered[index]
-			_catalog_list.add_item("%s [%s]" % [card.display_name, card.card_id])
-			if card.card_id == chosen_card:
-				_catalog_list.select(index)
+	_refresh_catalog()
 	_entry_keys.clear()
 	_deck_list.clear()
 	if deck != null:
@@ -271,3 +272,20 @@ func refresh() -> void:
 		deck.total_cards() if deck != null else 0, _entry_keys.size(), save_path
 	]
 	_validate()
+
+
+## Filtering does not recompute deck validation or rebuild the deck list.
+func _refresh_catalog() -> void:
+	if not is_node_ready():
+		return
+	var selected_id: StringName = _selected_catalog_id()
+	_filtered.clear()
+	_catalog_list.clear()
+	if catalog == null:
+		return
+	_filtered = catalog.search(_search.text)
+	for index in range(_filtered.size()):
+		var card: DeckitCardDefinition = _filtered[index]
+		_catalog_list.add_item("%s [%s]" % [card.display_name, card.card_id])
+		if card.card_id == selected_id:
+			_catalog_list.select(index)

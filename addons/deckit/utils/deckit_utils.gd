@@ -2,8 +2,8 @@ class_name DeckitUtils
 
 
 static func collision_layer_to_value(layer: int) -> int:
-	if layer > 32:
-		push_error("CollisionHelper->layer_to_value: The specified collision layer (%d) is invalid. Please ensure the layer value is between 1 and 32" % layer)
+	if layer < 1 or layer > 32:
+		push_error("DeckitUtils.layer_to_value: The specified collision layer (%d) is invalid. Please ensure the layer value is between 1 and 32" % layer)
 	
 	return pow(2, clampi(layer, 1, 32) - 1)
 	
@@ -17,7 +17,7 @@ static func collision_value_to_layer(value: int) -> int:
 	if value > 0 and (value & (value - 1)) == 0:
 		return (log(value) / log(2)) + 1
 	
-	push_error("CollisionHelper->value_to_layer: The specified value %d) is invalid. Please ensure the value is a power of 2" % value)
+	push_error("DeckitUtils.value_to_layer: The specified value %d) is invalid. Please ensure the value is a power of 2" % value)
 	
 	return 0
 	
@@ -40,7 +40,7 @@ static func remove_child_nodes(node: Node) -> void:
 ## Supports RegEx expressions
 static func get_files_recursive(path: String, regex: RegEx = null) -> Array:
 	if path.is_empty() or not DirAccess.dir_exists_absolute(path):
-		push_error("IndieBlueprintFileHelper>get_files_recursive: directory not found '%s'" % path)
+		push_error("DeckitUtils.get_files_recursive: directory not found '%s'" % path)
 
 		return []
 
@@ -65,9 +65,11 @@ static func get_files_recursive(path: String, regex: RegEx = null) -> Array:
 					
 			file = directory.get_next()
 			
+		directory.list_dir_end()
+		files.sort()
 		return files
 	else:
-		push_error("IndieBlueprintFileHelper->get_files_recursive: An error %s occured when trying to open directory: %s" % [DirAccess.get_open_error(), path])
+		push_error("DeckitUtils.get_files_recursive: An error %s occurred when trying to open directory: %s" % [DirAccess.get_open_error(), path])
 		
 		return []
 
@@ -87,10 +89,9 @@ static func dirpath_is_valid(path: String) -> bool:
 	return not path.is_empty() and path.is_absolute_path() and DirAccess.dir_exists_absolute(path)
 
 
+## Compatibility alias; prefer center_pivot() for new code.
 static func center_texture_rect_pivot(texture_rect: TextureRect) -> TextureRect:
-	if texture_rect.texture:
-		texture_rect.pivot_offset = (texture_rect.texture.get_size() / 2).ceil()
-	
+	center_pivot(texture_rect)
 	return texture_rect
 
 
@@ -98,6 +99,11 @@ static func repeat(element: Variant, times: int) -> Array[Variant]:
 	var result: Array[Variant] = []
 	
 	for _time: int in times:
-		result.append(element.duplicate())
+		if element is Dictionary or element is Array:
+			result.append(element.duplicate(true))
+		elif element is Resource:
+			result.append(element.duplicate())
+		else:
+			result.append(element)
 		
 	return result

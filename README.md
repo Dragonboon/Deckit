@@ -99,7 +99,7 @@ Deckit supplies building blocks, **not a finished game**. In particular:
 
 [Core](docs/CORE_API.md) · [Classic components](docs/CLASSIC_COMPONENTS.md) · [Deck builder](docs/DECK_BUILDER.md) · [Actions](docs/ACTIONS_AND_EFFECTS.md) · [Presentation](docs/PRESENTATION.md) · [Events](docs/EVENTS.md) · [Turns](docs/TURNS_AND_PHASES.md) · [Priority](docs/PRIORITY_WINDOWS.md)
 
-[Run all local tests](docs/INTEGRATION_VALIDATION.md) · [Report a problem](https://github.com/sempitern0/Deckit/issues/new/choose) · [Contribute](CONTRIBUTING.md) · [Security](SECURITY.md)
+[Accessibility and maintenance](docs/MAINTENANCE.md) · [Run all local tests](docs/INTEGRATION_VALIDATION.md) · [Report a problem](https://github.com/sempitern0/Deckit/issues/new/choose) · [Contribute](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 ## License
 

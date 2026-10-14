@@ -10,7 +10,8 @@ var front_revealed: bool = false
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(118, 154)
+	custom_minimum_size = Vector2(104, 138)
+	tooltip_text = "Card. Press Enter or Space to select."
 	focus_mode = Control.FOCUS_ALL
 	pressed.connect(_on_pressed)
 	refresh()
@@ -41,7 +42,10 @@ func refresh() -> void:
 		if card_instance.exhausted:
 			text += "\n[Exhausted]"
 		if not card_instance.counters.is_empty():
-			text += "\nCounters: %d" % card_instance.counters.size()
+			var labels := PackedStringArray()
+			for key in card_instance.counters:
+				labels.append("%s: %d" % [key, int(card_instance.counters[key])])
+			text += "\n" + ", ".join(labels)
 		icon = definition.front_texture
 		tooltip_text = label
 	else:

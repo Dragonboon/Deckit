@@ -14,9 +14,10 @@ func _ready() -> void:
 	var page := DeckitLabUI.page(self, "Playable • " + names[scenario],
 		"Original small ruleset using generic Deckit components. Click cards, make a move, and reset to repeat.")
 	var controls := DeckitLabUI.controls(page)
-	DeckitLabUI.button(controls, "Play selected", _play)
 	if scenario == 1:
 		DeckitLabUI.button(controls, "Submit 3 selected cards", _play)
+	else:
+		DeckitLabUI.button(controls, "Play selected", _play)
 	if scenario == 2:
 		DeckitLabUI.button(controls, "End turn", _end_turn)
 	DeckitLabUI.button(controls, "Restart", _reset)
@@ -24,6 +25,7 @@ func _ready() -> void:
 	cards_list = ItemList.new()
 	cards_list.custom_minimum_size = Vector2(500, 245)
 	cards_list.select_mode = ItemList.SELECT_MULTI if scenario == 1 else ItemList.SELECT_SINGLE
+	cards_list.tooltip_text = "Select a card using the mouse or keyboard. For French Melds select three."
 	page.add_child(cards_list)
 	stats = DeckitLabUI.info(page, "")
 	status = DeckitLabUI.info(page, "")
@@ -72,7 +74,7 @@ func _play() -> void:
 		if selected.size() == 1 and selected[0] < cards.size():
 			ok = match_state.play(cards[selected[0]].instance_id)
 	if not ok and not match_state.finished:
-		status.text = "Move unavailable. Select a valid card / combination. " + match_state.last_message
+			status.text = "Move unavailable. Select a valid card or combination. " + match_state.last_message
 	_refresh()
 
 

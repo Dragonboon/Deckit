@@ -22,7 +22,7 @@ func _ready() -> void:
 	DeckitLabUI.button(page, "12  Resource Duel: energy, protection and effects", _open_microgame.bind("resource_duel"))
 	DeckitLabUI.info(
 		page,
-		"Start each lab independently; use the All labs button to return. Labs 01–02 exercise the headless core; 03 tests legacy nodes; 04 uses the optional new presenter without game rules."
+		"Use Tab and Shift+Tab to navigate; Enter or Space activates focused buttons. Each example is independent of the installable addon."
 	)
 
 

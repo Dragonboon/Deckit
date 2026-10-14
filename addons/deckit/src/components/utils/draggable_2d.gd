@@ -50,7 +50,7 @@ func _process(delta: float) -> void:
 		last_mouse_position = draggable.global_position
 		
 		if drag_smooth_lerp_factor > 0:
-			draggable.global_position = draggable.global_position.lerp(get_global_mouse_position(), drag_smooth_lerp_factor * delta)
+			draggable.global_position = draggable.global_position.lerp(get_global_mouse_position(), clampf(drag_smooth_lerp_factor * delta, 0.0, 1.0))
 		else:
 			draggable.global_position = get_global_mouse_position()
 			
