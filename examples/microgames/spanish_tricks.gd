@@ -4,7 +4,8 @@ class_name DeckitDemoSpanishTricks extends RefCounted
 
 const SUITS: Array[String] = ["oros", "copas", "espadas", "bastos"]
 const RANKS: Array[int] = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12]
-const STRENGTH: PackedInt32Array = PackedInt32Array([1, 3, 12, 11, 10, 7, 6, 5, 4, 2])
+## GDScript constants cannot call PackedInt32Array() constructors.
+const STRENGTH = [1, 3, 12, 11, 10, 7, 6, 5, 4, 2]
 
 var game := DeckitGameState.new()
 var turns := DeckitTurnManager.new()
@@ -94,7 +95,7 @@ func play(card_id: StringName) -> bool:
 		return turns.end_turn()
 
 	var pair: Array[DeckitCardInstance] = trick.cards.duplicate()
-	var winner_index: int = DeckitCardRanking.trick_winner(pair, trump_suit, STRENGTH)
+	var winner_index: int = DeckitCardRanking.trick_winner(pair, trump_suit, PackedInt32Array(STRENGTH))
 	var winner: StringName = &"p1" if winner_index == 0 and actor == &"p2" else &"p2"
 	# If the first lead was p2 instead, the second player must be p1.
 	if winner_index == 0:

@@ -1,45 +1,61 @@
 @tool
 extends EditorPlugin
 
+## Custom editor icons are loaded from their SVG source at runtime.
+## Do not preload imported SVG textures here: this plugin is enabled by
+## project.godot and may be parsed before Godot completes the first import.
+const ICON_DIRECTORY: String = "res://addons/deckit/assets/"
+
+
+func _icon(name: String) -> Texture2D:
+	var path: String = ICON_DIRECTORY.path_join(name + ".svg")
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		push_warning("Deckit: Custom icon not found: %s" % path)
+		return null
+
+	var data: PackedByteArray = file.get_buffer(file.get_length())
+	file.close()
+	var image := Image.new()
+	if image.load_svg_from_buffer(data) != OK:
+		push_warning("Deckit: Cannot render editor icon: %s" % path)
+		return null
+	return ImageTexture.create_from_image(image)
+
 
 func _enter_tree() -> void:
 	add_custom_type(
 		"DeckitDraggable2D",
 		"Button",
-		preload("src/components/utils/draggable_2d.gd"), 
-		preload("assets/draggable_2d.svg")
+		preload("src/components/utils/draggable_2d.gd"),
+		_icon("draggable_2d")
 	)
-	
 	add_custom_type(
-		"DeckitPlayingCardUI", 
+		"DeckitPlayingCardUI",
 		"Control",
 		preload("src/components/ui/playing_card_ui.gd"),
-		preload("assets/playing_card.svg")
+		_icon("playing_card")
 	)
-	
 	add_custom_type(
-		"DeckitCardHand", 
+		"DeckitCardHand",
 		"Control",
 		preload("src/components/ui/card_hand.gd"),
-		preload("assets/card_hand.svg")
+		_icon("card_hand")
 	)
-	
 	add_custom_type(
-		"DeckitCardPile", 
+		"DeckitCardPile",
 		"Control",
 		preload("src/components/ui/card_pile.gd"),
-		preload("assets/card_pile.svg")
+		_icon("card_pile")
 	)
-	
 	add_custom_type(
-		"DeckitDeck", 
+		"DeckitDeck",
 		"Control",
 		preload("src/components/ui/deck.gd"),
-		preload("assets/deck.svg")
+		_icon("deck")
 	)
-	
 	add_custom_type(
-		"DeckitDeckCreator", 
+		"DeckitDeckCreator",
 		"Node",
 		preload("src/decks/deck_creator.gd"),
 		null
