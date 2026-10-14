@@ -122,8 +122,8 @@ func next_phase() -> bool:
 	var old_phase: StringName = current_phase()
 	var old_participant: StringName = current_participant()
 	var old_turn: int = turn_number
-	_phase_index += 1
 	phase_ended.emit(old_participant, old_phase, old_turn)
+	_phase_index += 1
 	phase_started.emit(current_participant(), current_phase(), turn_number)
 	_transitioning = false
 	return true

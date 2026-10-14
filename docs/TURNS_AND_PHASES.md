@@ -38,6 +38,6 @@ queue.drain()
 
 A game can implement phase-specific costs, legal actions and active-player checks by registering its own `DeckitCardRule` on the game state. That policy is not built into Deckit.
 
-**Important:** starting at a non-first participant still counts as round 1. A new round begins when the cycle crosses from the last participant to the first. Signals are synchronous and the manager rejects reentrant transition calls. Neither the manager nor its event bridge implements rollback, timer-driven turns, automatic queues, interrupts, or networking.
+**Important:** starting at a non-first participant still counts as round 1. A new round begins when the cycle crosses from the last participant to the first. Signals are synchronous: ending signals observe the outgoing participant/phase and counters, starting signals observe the incoming state, and the manager rejects reentrant transition calls. Neither the manager nor its event bridge implements rollback, timer-driven turns, automatic queues, interrupts, or networking.
 
 Run `res://examples/labs/turns_lab.tscn` or `godot --headless --path . --script res://tests/headless/test_turns.gd`.

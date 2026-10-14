@@ -98,7 +98,7 @@ godot --headless --path . --import
 godot --headless --path . --script res://tests/headless/test_core.gd
 ```
 
-These are **tests to run locally**, not a claim of completed Godot runtime validation.
+For full cross-module regression coverage, see [Integration validation](docs/INTEGRATION_VALIDATION.md). These are **tests to run locally**, not a claim of completed Godot runtime validation.
 
 ## Contributing and license
 
