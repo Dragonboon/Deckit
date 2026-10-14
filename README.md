@@ -32,7 +32,7 @@ Deckit is a **modular toolkit**, not a game-specific rules engine. Design reusab
 | `DeckitCardRule` | Extend action eligibility for your game's own rules |
 | `DeckitGameState` | Execute allowed actions and observe success/failure |
 
-The new **headless core** is separate from the existing visual components. Rules for turns, costs, combat and abilities remain game-owned and are **not yet implemented**.
+The new **headless core** is separate from the legacy visual components; optional `DeckitCardView` and `DeckitZoneView` render it without enforcing game rules. Rules for turns, costs, combat and abilities remain game-owned and are **not yet implemented**.
 
 ## Quick start
 
@@ -58,9 +58,9 @@ game.perform(DeckitCardAction.new(&"draw", &"hand", card.instance_id))
 
 See **[Core API and rules](docs/CORE_API.md)** for practical usage, limitations, and reproducible headless tests.
 
-## Explore three interactive labs
+## Explore four interactive labs
 
-Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, or **Legacy Visual Components**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
+Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, **Legacy Visual Components**, or **State + Presentation**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
 
 ## Existing UI components
 
