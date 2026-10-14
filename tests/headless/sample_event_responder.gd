@@ -5,7 +5,7 @@ var respond: bool = false
 
 
 func matches(event: DeckitGameEvent, game: DeckitGameState) -> bool:
-	return super.matches(event, game)
+	return super.matches(event, game) and event.source_zone_id == &"hand" and event.destination_zone_id == &"table"
 
 
 func make_actions(event: DeckitGameEvent, _game: DeckitGameState) -> Array[DeckitCardAction]:

@@ -43,7 +43,7 @@ func _run() -> void:
 	_check(queue.publish(DeckitGameEvent.new(DeckitGameEvent.ACTION_APPLIED, 10)), "Custom high-priority event")
 	_check(queue.publish(DeckitGameEvent.new(DeckitGameEvent.ACTION_APPLIED, 10)), "Equal-priority event")
 	_check(queue.resolve_next(), "Resolve first high priority")
-	_check(listener.seen.size() == 3, "Higher priority visited first")
+	_check(listener.seen.size() == 1, "Unrelated priority events do not match transfer-specific responder")
 	_check(queue.pending_count() == 2, "Remaining queue")
 	_check(queue.drain(1) == 1 and queue.pending_count() == 1, "Drain budget")
 	_check(queue.drain() == 1, "Remaining event")
