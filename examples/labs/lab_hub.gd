@@ -16,6 +16,10 @@ func _ready() -> void:
 	DeckitLabUI.button(page, "07  Optional timeline: phases, turns and pause", _open.bind("turns_lab"))
 	DeckitLabUI.button(page, "08  Priority windows: passes, responses and resolution", _open.bind("priority_lab"))
 	DeckitLabUI.button(page, "09  Deck Builder: catalog, editing and validation", _open.bind("deck_builder_lab"))
+	DeckitLabUI.heading(page, "Playable examples (rules outside the plugin)")
+	DeckitLabUI.button(page, "10  Spanish Tricks: follow suit, trump, 3 tricks", _open_microgame.bind("spanish_tricks"))
+	DeckitLabUI.button(page, "11  French Melds: runs, sets and score", _open_microgame.bind("french_melds"))
+	DeckitLabUI.button(page, "12  Resource Duel: energy, protection and effects", _open_microgame.bind("resource_duel"))
 	DeckitLabUI.info(
 		page,
 		"Start each lab independently; use the All labs button to return. Labs 01–02 exercise the headless core; 03 tests legacy nodes; 04 uses the optional new presenter without game rules."
@@ -24,3 +28,7 @@ func _ready() -> void:
 
 func _open(lab_name: String) -> void:
 	get_tree().change_scene_to_file("res://examples/labs/%s.tscn" % lab_name)
+
+
+func _open_microgame(game_name: String) -> void:
+	get_tree().change_scene_to_file("res://examples/microgames/%s.tscn" % game_name)

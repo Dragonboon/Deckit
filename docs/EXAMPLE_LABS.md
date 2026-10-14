@@ -32,3 +32,7 @@ godot --headless --path . --script res://tests/headless/test_core.gd
 ```
 
 Open each lab in the graphical editor for user-interface interaction checks.
+
+## Playable integration scenarios
+
+Three additional scenes live under `examples/microgames/`: `spanish_tricks.tscn`, `french_melds.tscn`, and `resource_duel.tscn`. See [Microgames](MICROGAMES.md). Their rules never become part of the plugin.

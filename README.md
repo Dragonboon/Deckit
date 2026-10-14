@@ -31,7 +31,7 @@ You can use **one component on its own**, or combine several. Deckit does not in
 4. For the classic editor nodes (hands, piles and deck controls), enable **Deckit** under **Project → Project Settings → Plugins**.
 5. Create your own card definitions and connect only the modules you need. The data and headless systems use globally registered GDScript classes; they do not require a game scene.
 
-> **Start here:** The repository includes nine independent labs in `examples/labs/`. They are optional demonstrations, not files you need to ship with your game.
+> **Start here:** The repository includes nine feature labs and three small playable integration examples in `examples/labs/`. They are optional demonstrations, not files you need to ship with your game.
 
 ## Quick start
 
@@ -77,7 +77,7 @@ Open the repository itself as a Godot project and run:
 
 **`res://examples/labs/lab_hub.tscn`**
 
-The nine labs cover card movement, rule checks, classic visuals, data-driven views, effects, event resolution, turns, priority and deck editing. See the [lab overview](docs/EXAMPLE_LABS.md) for a feature-by-feature map.
+The nine feature labs cover card movement, rule checks, classic visuals, data-driven views, effects, event resolution, turns, priority and deck editing. Three [playable microgames](docs/MICROGAMES.md) exercise Spanish tricks, French card patterns and TCG/LCG-style resources with original rules. See the [lab overview](docs/EXAMPLE_LABS.md) for a feature-by-feature map.
 
 The labs are **outside the add-on folder** so they do not get bundled when you install only `addons/deckit/`.
 
