@@ -58,9 +58,9 @@ game.perform(DeckitCardAction.new(&"draw", &"hand", card.instance_id))
 
 See **[Core API and rules](docs/CORE_API.md)** for practical usage, limitations, and reproducible headless tests.
 
-## Explore six interactive labs
+## Explore seven interactive labs
 
-Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, **Legacy Visual Components**, **State + Presentation**, **Targets & Effects**, or **Event Queue**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
+Open [`examples/labs/lab_hub.tscn`](examples/labs/lab_hub.tscn) in Godot 4.7 and choose **Zone Flow**, **Rule Gates**, **Legacy Visual Components**, **State + Presentation**, **Targets & Effects**, **Event Queue**, or **Turns & Phases**. Each demonstration is standalone and lives outside the reusable addon. See the [lab guide](docs/EXAMPLE_LABS.md) for the feature matrix and limitations.
 
 ## Optional actions and effects
 
@@ -69,6 +69,10 @@ The [`actions and effects`](docs/ACTIONS_AND_EFFECTS.md) layer provides target s
 ## Optional event resolution
 
 The [event queue](docs/EVENTS.md) supports opt-in event notifications, explicit resolution, priority-ordered responders, causal chain limits, cancellation, and bounded diagnostic traces. The queue does not introduce rules, automatic interrupts, rollback or networking.
+
+## Optional turns and phases
+
+The [turn manager](docs/TURNS_AND_PHASES.md) coordinates configurable participants and phases with pause/resume and transition hooks. Its event bridge is strictly opt-in and never imposes game-specific action legality or automatic progression.
 
 ## Existing UI components
 
@@ -79,7 +83,7 @@ They remain available while their integration and refactor proceed incrementally
 ## Roadmap
 
 - Bind the existing UI components to card instances and zones without hardcoded game rules.
-- Add effect/action pipelines, turn phases, deck-building validation and opt-in TCG/LCG modules.
+- Expand reusable effects, deck-building validation and optional TCG/LCG integrations.
 - Extend the example lab catalog, add persistence interfaces and further Godot 4.7 validation.
 - Keep multiplayer transport and game policy optional, never mandatory dependencies.
 
