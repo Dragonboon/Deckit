@@ -9,6 +9,7 @@ Start **`res://examples/labs/lab_hub.tscn`** from Godot 4.7. No external assets 
 | `legacy_ui_lab.tscn` | Hand horizontal/fan/arc layouts, card creation and presentation, face toggling and visual piles | Existing legacy UI |
 | `presenter_lab.tscn` | State-driven card views, authoritative transfers, per-viewer disclosure, counters, rejection feedback | Optional presenter + core |
 | `actions_lab.tscn` | Target selection, tag conditions, counter/face effects, move + effect sequences | Optional actions + core |
+| `events_lab.tscn` | Queued action notifications, event priority, explicit response resolution and safety caps | Optional events + core |
 
 ## Boundaries
 
