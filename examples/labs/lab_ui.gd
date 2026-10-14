@@ -10,20 +10,20 @@ static func page(root: Control, page_heading: String, summary: String) -> VBoxCo
 	root.add_child(scroll)
 	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 28)
-	margin.add_theme_constant_override("margin_top", 20)
-	margin.add_theme_constant_override("margin_right", 28)
-	margin.add_theme_constant_override("margin_bottom", 24)
+	margin.add_theme_constant_override("margin_left", 16)
+	margin.add_theme_constant_override("margin_top", 12)
+	margin.add_theme_constant_override("margin_right", 16)
+	margin.add_theme_constant_override("margin_bottom", 16)
 	scroll.add_child(margin)
 	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 12)
+	column.add_theme_constant_override("separation", 8)
 	margin.add_child(column)
 
 	var title := Label.new()
 	title.text = page_heading
-	title.add_theme_font_size_override("font_size", 30)
+	title.add_theme_font_size_override("font_size", 23)
 	column.add_child(title)
 
 	var description := Label.new()
@@ -41,7 +41,7 @@ static func page(root: Control, page_heading: String, summary: String) -> VBoxCo
 static func heading(parent: Node, value: String) -> Label:
 	var label := Label.new()
 	label.text = value
-	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_font_size_override("font_size", 16)
 	parent.add_child(label)
 	return label
 

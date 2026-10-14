@@ -21,6 +21,8 @@ func _ready() -> void:
 	DeckitLabUI.button(controls, "Resolve next", _resolve_next)
 	DeckitLabUI.button(controls, "Drain queue", _drain)
 	DeckitLabUI.button(controls, "Publish high-priority custom event", _publish_custom)
+	DeckitLabUI.button(controls, "Cancel pending", _cancel_pending)
+	DeckitLabUI.button(controls, "Stop on rejection", _toggle_policy)
 	DeckitLabUI.button(controls, "Reset", _reset)
 	status = DeckitLabUI.info(page, "")
 	history = DeckitLabUI.info(page, "")
@@ -36,6 +38,8 @@ func _ready() -> void:
 
 func _reset() -> void:
 	queue.clear_pending()
+	queue.clear_trace()
+	queue.rejection_policy = DeckitEventQueue.RejectionPolicy.CONTINUE
 	game.zones.clear()
 	source.cards.clear()
 	destination.cards.clear()
@@ -69,6 +73,16 @@ func _drain() -> void:
 	_update()
 
 
+func _cancel_pending() -> void:
+	var before := queue.pending_count()
+	queue.clear_pending()
+	_log("Cancelled %d pending events" % before)
+	_update()
+
+func _toggle_policy() -> void:
+	queue.rejection_policy = DeckitEventQueue.RejectionPolicy.STOP_DRAIN if queue.rejection_policy == DeckitEventQueue.RejectionPolicy.CONTINUE else DeckitEventQueue.RejectionPolicy.CONTINUE
+	_log("Policy: %s" % ("stop drain" if queue.rejection_policy == DeckitEventQueue.RejectionPolicy.STOP_DRAIN else "continue"))
+
 func _publish_custom() -> void:
 	queue.publish(DeckitGameEvent.new(&"example.notification", 100, {"context": "lab"}))
 	_update()
@@ -88,6 +102,8 @@ func _log(message: String) -> void:
 	if history == null:
 		return
 	history.text += "\n" + message
+	if history.text.length() > 2400:
+		history.text = "Resolution log:\n" + history.text.right(1800)
 
 
 func _update() -> void:

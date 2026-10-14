@@ -26,21 +26,21 @@ func _ready() -> void:
 	DeckitLabUI.button(actions, "Reset", _reset)
 	info = DeckitLabUI.info(page, "The visuals use bundled SVG artwork; no external assets or game-specific card set.")
 	var surface := PanelContainer.new()
-	surface.custom_minimum_size = Vector2(850, 340)
+	surface.custom_minimum_size = Vector2(720, 280)
 	page.add_child(surface)
 	var field := Control.new()
-	field.custom_minimum_size = Vector2(850, 340)
+	field.custom_minimum_size = Vector2(720, 280)
 	surface.add_child(field)
 	hand = DeckitCardHand.new()
-	hand.position = Vector2(180, 210)
+	hand.position = Vector2(140, 175)
 	hand.maximum_cards = 0
 	hand.maximum_selected_cards = 0
-	hand.horizontal_separation = Vector2(66, 0)
+	hand.horizontal_separation = Vector2(57, 0)
 	hand.horizontal_min_rotation_angle = 0.0
 	hand.horizontal_max_rotation_angle = 0.0
 	field.add_child(hand)
 	pile = preload("res://addons/deckit/src/components/ui/card_pile.tscn").instantiate()
-	pile.position = Vector2(690, 160)
+	pile.position = Vector2(565, 130)
 	pile.maximum_cards_in_pile = 0
 	pile.min_rotation_on_card_dropped = 0.0
 	pile.max_rotation_on_card_dropped = 0.0
@@ -52,7 +52,7 @@ func _ready() -> void:
 	field.add_child(hand_label)
 	var pile_label := Label.new()
 	pile_label.text = "PILE"
-	pile_label.position = Vector2(640, 20)
+	pile_label.position = Vector2(530, 20)
 	field.add_child(pile_label)
 	call_deferred("_reset")
 

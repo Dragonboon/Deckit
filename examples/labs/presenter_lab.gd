@@ -37,7 +37,7 @@ func _ready() -> void:
 	page.add_child(grid)
 	for target_id in [&"draw", &"hand", &"table", &"discard"]:
 		var surface := PanelContainer.new()
-		surface.custom_minimum_size = Vector2(330, 215)
+		surface.custom_minimum_size = Vector2(300, 170)
 		grid.add_child(surface)
 		var margin := MarginContainer.new()
 		margin.add_theme_constant_override("margin_left", 12)

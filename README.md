@@ -68,7 +68,7 @@ The [`actions and effects`](docs/ACTIONS_AND_EFFECTS.md) layer provides target s
 
 ## Optional event resolution
 
-The [event queue](docs/EVENTS.md) supports opt-in event notifications, explicit resolution, priority-ordered responders and bounded reaction chains. The queue does not introduce rules, automatic interrupts, rollback or networking.
+The [event queue](docs/EVENTS.md) supports opt-in event notifications, explicit resolution, priority-ordered responders, causal chain limits, cancellation, and bounded diagnostic traces. The queue does not introduce rules, automatic interrupts, rollback or networking.
 
 ## Existing UI components
 

@@ -29,3 +29,21 @@ A responder subclasses `DeckitEventResponder` and overrides `matches()` or `make
 - Notifications snapshot action identifiers, not complete historical card state. The host must maintain any required authoritative action log and filter hidden information before sending it to other players.
 
 Try `res://examples/labs/events_lab.tscn` and run `godot --headless --path . --script res://tests/headless/test_events.gd`.
+
+
+## Resolution safeguards (new)
+
+The resolver assigns monotonically increasing `event_id`, a `chain_id` and a causal `depth` when an event is accepted. A responder-generated action emits an event in the same chain at depth +1.
+
+- `max_chain_depth` (default 8): reject deeper notifications.
+- `max_similar_events_per_chain` (default 3): reject identical event signatures within a chain. Set 0 to disable this heuristic for legitimate repeated responses.
+- `get_trace()`: a bounded copy of diagnostic entries containing event/chain IDs, depth, status, reason and action counts. `max_trace_entries` defaults to 128.
+- `cancel_event(event_id)` / `cancel_chain(chain_id)` / `clear_pending()`: cancel only unresolved notifications; never undo applied state.
+- `rejection_policy`: `CONTINUE`, `STOP_EVENT` or `STOP_DRAIN`. Previously successful actions stay committed.
+- `request_stop()`: politely stop after the currently active event completes.
+
+Event signatures consist of the event type, actor, card instance and source/destination zone. This is a **best-effort guard**, not semantic equivalence of all custom payloads. Limits are per queue/chain and never enforce game turns or target legality.
+
+### Display sizing
+
+The example project now opens at **960×600** without the earlier 2× viewport-to-window enlargement. Laboratory padding, headings and sample-board dimensions have been reduced. These preferences are scoped to the repository's example project, not to consumer games installing `addons/deckit/`.

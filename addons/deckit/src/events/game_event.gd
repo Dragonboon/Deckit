@@ -1,5 +1,5 @@
-## Immutable-by-convention notification data. Game actions remain authoritative.
-## Snapshot key action fields at publication time; payload is copied on creation.
+## Snapshot of a notification. Once published, treat its fields as read-only.
+## The resolver assigns event_id, chain_id and depth on acceptance.
 class_name DeckitGameEvent extends RefCounted
 
 const ACTION_APPLIED: StringName = &"action.applied"
@@ -12,6 +12,11 @@ var card_instance_id: StringName = &""
 var source_zone_id: StringName = &""
 var destination_zone_id: StringName = &""
 var payload: Dictionary = {}
+
+## Resolver-owned identifiers: 0 denotes an unpublished event.
+var event_id: int = 0
+var chain_id: int = 0
+var depth: int = 0
 
 
 func _init(kind: StringName = &"", event_priority: int = 0, details: Dictionary = {}) -> void:
