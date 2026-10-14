@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://bs0yshnahjais"]
 
-[ext_resource type="Script" path="res://examples/labs/zone_flow_lab.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://dhkbrj6s2w8g5" path="res://examples/labs/zone_flow_lab.gd" id="1_script"]
 
-[node name="ZoneFlowLab" type="Control"]
+[node name="ZoneFlowLab" type="Control" unique_id=500052540]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

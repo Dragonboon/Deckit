@@ -4,7 +4,7 @@ class_name DeckitLabUI extends RefCounted
 const HUB: String = "res://examples/labs/lab_hub.tscn"
 
 
-static func page(root: Control, heading: String, summary: String) -> VBoxContainer:
+static func page(root: Control, page_heading: String, summary: String) -> VBoxContainer:
 	var scroll := ScrollContainer.new()
 	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(scroll)
@@ -22,7 +22,7 @@ static func page(root: Control, heading: String, summary: String) -> VBoxContain
 	margin.add_child(column)
 
 	var title := Label.new()
-	title.text = heading
+	title.text = page_heading
 	title.add_theme_font_size_override("font_size", 30)
 	column.add_child(title)
 
