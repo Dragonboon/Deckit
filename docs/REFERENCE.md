@@ -130,3 +130,44 @@ turns.end_turn()
 Deckit is a toolkit, **not a complete Spanish/French card-game, TCG or LCG engine**. Rules for betting, combat, scenarios, network authority, hidden-information transport, persistent campaigns and match saves belong to your game. Only deck *recipes* currently have portable JSON support. The included example rules live under `examples/`, not `addons/deckit/`.
 
 See [Examples](EXAMPLES.md) to inspect each module in isolation or in a small playable flow.
+
+
+## Opt-in drag and free table layout
+
+`DeckitZoneView` adds `drag_enabled`, `drop_enabled` (both false by default), and
+`actor_id`. Bind it to a game and zone as usual. The viewer controls face visibility;
+the actor is supplied to actions and must be checked by game-specific rules.
+
+Set `free_layout = true` **before adding the view to the scene tree** to replace the
+flow layout with a free surface; `table_height` sets its minimum height. The default
+flow layout continues to order cards by the zone. `max_visible_cards = 0` shows all.
+Free layout is intended for small tableaus; overlapping cards are allowed.
+
+- `set_card_position(id, position)` clamps a UI position inside the card surface.
+- `card_positions` is keyed by instance ID and stores positions in that surface,
+  below the zone heading. Positions are not serialized into game state.
+- `card_position_changed(id, position)` lets a host persist/replay UI positions.
+- `drop_completed(action, accepted)` reports a handled drop. Same-zone free
+  placement is accepted without executing the synthetic transfer action.
+- An invalid hover/release is ignored, uses Godot's rejected-drop cursor, and emits
+  no action. Rejected drops never remove the original card.
+
+`DeckitCardDrag` carries an in-process state/instance reference, zone, actor and
+pointer offset. It rejects foreign game states and stale/replaced instances.
+It is not a network format or authority token. A preview uses the source view's
+reveal policy; hidden cards do not expose their name or counters visually.
+
+`DeckitGameState.can_perform(action)` checks the same preconditions/rules as
+`perform()` without applying or emitting signals. `CardRule.allows()`, conditions
+and `can_apply()` **must be side-effect free** because drag hover can query them
+many times. `perform()` rechecks when the drop is committed. Custom actions still
+own their mutation/rollback policy.
+
+Standalone `DeckitCardView` drag setup uses `drag_enabled`, `drag_game`,
+`drag_zone_id` and `drag_actor_id`; bound ZoneViews fill these automatically on
+refresh. Card views keep the existing Button text/icon and selection API while
+rendering artwork, side badge and caption in separate non-interactive child controls.
+
+See [recipes](RECIPES.md) and lab 01 for keyboard alternatives. The classic
+`DeckitDraggable2D` remains a separate presentation helper; it does not synchronize
+with state zones or enforce gameplay rules.

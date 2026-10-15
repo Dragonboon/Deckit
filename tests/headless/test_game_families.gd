@@ -40,8 +40,8 @@ func _spanish_and_french() -> void:
 	for format in ["spanish_40", "french_52"]:
 		var catalog := DeckitCardCatalog.new()
 		var deck := DeckitDeckList.new()
-		var suits: Array[String] = ["oros", "copas", "espadas", "bastos"] if format == "spanish_40" else ["clubs", "diamonds", "hearts", "spades"]
-		var ranks: Array[int] = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12] if format == "spanish_40" else [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+		var suits: Array = ["oros", "copas", "espadas", "bastos"] if format == "spanish_40" else ["clubs", "diamonds", "hearts", "spades"]
+		var ranks: Array = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12] if format == "spanish_40" else [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 		for suit in suits:
 			for rank in ranks:
 				var id := StringName("%s-%d" % [suit, rank])

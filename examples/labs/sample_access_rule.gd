@@ -9,7 +9,7 @@ extends DeckitCardRule
 func allows(action: DeckitCardAction, game: DeckitGameState) -> bool:
 	if action.destination_zone_id != destination_id:
 		return true
-	if action.actor_id != required_actor:
+	if required_actor != &"" and action.actor_id != required_actor:
 		return false
 	var source := game.get_zone(action.source_zone_id)
 	if source == null:

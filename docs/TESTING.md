@@ -6,7 +6,7 @@ Target engine: **Godot 4.7.x**. You can use the repository as an example project
 
 1. Open the Deckit project and let Godot scan/import files.
 2. Enable the add-on in **Project → Project Settings → Plugins**.
-3. Open `res://examples/labs/lab_hub.tscn` and try the nine labs and three microgames.
+3. Open `res://examples/labs/lab_hub.tscn` and try the three guided labs; optional microgames are in the expandable section.
 4. For a clean-install check, copy **only** `addons/deckit/` into a new Godot 4.7.x project; confirm editor custom nodes and `DeckitCardDefinition.new()` are available.
 5. Run the headless suite below after the import finishes.
 
@@ -20,6 +20,9 @@ godot --headless --path . --script res://tests/headless/test_core.gd
 godot --headless --path . --script res://tests/headless/test_actions.gd
 godot --headless --path . --script res://tests/headless/test_presentation.gd
 godot --headless --path . --script res://tests/headless/test_lab_visuals.gd
+godot --headless --path . --script res://tests/headless/test_drag_drop.gd
+godot --headless --path . --script res://tests/headless/test_native_drag.gd
+godot --headless --path . --script res://tests/headless/test_lab_workflows.gd
 godot --headless --path . --script res://tests/headless/test_events.gd
 godot --headless --path . --script res://tests/headless/test_resolution.gd
 godot --headless --path . --script res://tests/headless/test_turns.gd
@@ -57,4 +60,19 @@ No GitHub Actions workflow is necessary. Running a test script without errors is
 - Networking, complete saved games, hidden-information security and game-specific combat/scoring rules are not built in.
 - Classic visual controls and the newer headless state model remain separate APIs.
 
-To report a reproducible error, use the [GitHub issue templates](https://github.com/sempitern0/Deckit/issues/new/choose) with your engine version and the affected example or component.
+To report a reproducible error, use the [GitHub issue templates](https://github.com/Dragonboon/Deckit/issues/new/choose) with your engine version and the affected example or component.
+
+
+## Drag/drop acceptance checks
+
+`test_drag_drop.gd` covers pure hover checks, capacities, rules, foreign payloads,
+stale/reset instances, cancellation, hidden faces, selection and bounded placement.
+`test_native_drag.gd` pushes real mouse events into the viewport to exercise
+Control's drag threshold, release routing, empty surface drops and cancellation.
+`test_lab_workflows.gd` plays the guided draw/flip, LIFO/FIFO/reaction and deck
+materialization flows, including reset and invalid recipes.
+
+For graphical QA, check at 1120×820 and a narrower window: cards must have distinct
+FRONT/BACK badges, readable captions, visible selection/focus and accessible buttons.
+Draw/hand/discard panels wrap; the free surface stays inside its allotted area.
+No gameplay tests require network access or GitHub Actions.

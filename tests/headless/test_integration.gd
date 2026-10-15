@@ -82,5 +82,9 @@ func _run() -> void:
 	_check(not priority.resolve_next(), "Game validation rejects stale action")
 	_check(destination.contains(instance) and priority.pending_count() == 0, "Rejected action preserves game state")
 	_check(priority.cancel(), "Cancel remaining window")
+	# Lambdas above capture the RefCounted emitter; disconnect before releasing it.
+	for descriptor in turns.get_signal_list():
+		for connection in turns.get_signal_connection_list(descriptor.name):
+			turns.disconnect(descriptor.name, connection.callable)
 	print("[Deckit integration] %d passed, %d failed" % [passed, failed])
 	quit(0 if failed == 0 else 1)

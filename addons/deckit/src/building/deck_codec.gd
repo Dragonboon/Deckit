@@ -28,7 +28,10 @@ static func encode(deck: DeckitDeckList) -> String:
 
 
 static func decode(json_text: String) -> DeckitDeckList:
-	var parsed: Variant = JSON.parse_string(json_text)
+	var parser := JSON.new()
+	if parser.parse(json_text) != OK:
+		return null
+	var parsed: Variant = parser.data
 	if not (parsed is Dictionary):
 		return null
 	var doc: Dictionary = parsed

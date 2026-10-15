@@ -35,7 +35,7 @@ See [Getting started](docs/GETTING_STARTED.md) for a first playable card transfe
 | Spanish or French playing cards | Suit/rank data, classic card visuals, shuffle, deal, card comparison and pattern helpers |
 | Deck construction | Searchable catalogs, per-section quantities, customizable validation and JSON import/export |
 | Card-game logic | Ordered zones, unique card instances, validated transfers, optional rules and target selection |
-| Effects and interaction | Counters, face changes, event queue, priority windows and basic state-driven views |
+| Effects and interaction | Counters, face changes, event queue, priority windows, state-driven views and opt-in drag/drop with free table positioning |
 | Turn-based games | Optional participant, phase, round, score and resource tracking |
 | TCG/LCG foundations | Composition of the above; **game-specific abilities, combat, scenarios and costs are up to you** |
 
@@ -67,18 +67,19 @@ To try features without writing your own game, open **this repository** as a God
 
 `res://examples/labs/lab_hub.tscn`
 
-It includes **9 interactive feature labs** and **3 small playable examples**: Spanish tricks, French card combinations and a resource-based duel. Those examples live outside the add-on; their rules are **not** part of Deckit. See the [example guide](docs/EXAMPLES.md).
+It includes **3 focused labs**: tabletop drag-and-drop, rules/responses, and deck construction. Press **F5** to open the hub. Three optional small games live behind an expandable section. All example policies stay outside the add-on. See the [lab guide](docs/EXAMPLES.md) and [integration mini-tutorials](docs/RECIPES.md).
 
 ## Documentation
 
 - [Getting started](docs/GETTING_STARTED.md) — installation, first cards, deck editor and setup
 - [API reference](docs/REFERENCE.md) — modules, common operations, limitations and extension points
-- [Examples](docs/EXAMPLES.md) — feature labs and playable microgames
+- [Examples](docs/EXAMPLES.md) — three guided labs and optional playable references
+- [Integration recipes](docs/RECIPES.md) — hands, drag/drop, hidden cards, effects, reactions, turns and deck construction
 - [Testing and troubleshooting](docs/TESTING.md) — local Godot tests, installation checks and common issues
 
 **Important:** The original visual hand/pile/deck controls and the newer headless state model are independent APIs; they are not automatically synchronized. Hidden-card UI is not network security, and action/event sequences do not provide transaction rollback. Read the [reference](docs/REFERENCE.md) before integrating either behavior.
 
-Problems and suggestions: [open an issue](https://github.com/sempitern0/Deckit/issues/new/choose). Security-sensitive reports: see [SECURITY.md](SECURITY.md).
+Problems and suggestions: [open an issue](https://github.com/Dragonboon/Deckit/issues/new/choose). Security-sensitive reports: see [SECURITY.md](SECURITY.md).
 
 ## License
 

@@ -1,215 +1,152 @@
+## A complete local tabletop: validated zone transfers and UI-only free positions.
 extends Control
 
-const ZONE_IDS: Array[StringName] = [&"draw", &"hand", &"table", &"discard"]
-
+const IDS: Array[StringName] = [&"draw", &"hand", &"table", &"discard"]
 var game := DeckitGameState.new()
-var randomizer := RandomNumberGenerator.new()
-var lists: Dictionary[StringName, ItemList] = {}
-var counts: Dictionary[StringName, Label] = {}
-var selection: Dictionary[StringName, StringName] = {}
+var views: Dictionary[StringName, DeckitZoneView] = {}
+var selected_zone: StringName = &""
+var selected_id: StringName = &""
 var status: Label
-var visual_zones: Array[DeckitZoneView] = []
-var selection_info: Label
-var selected_actions: Array[Button] = []
+var selection_label: Label
+var chosen_buttons: Array[Button] = []
+var rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
-	randomizer.seed = 314159
-	var page := DeckitLabUI.page(
-		self, "01 • Zone Flow",
-		"Move instance IDs between four independent zones. Select a card in a list or use its top card. No turn, suit or combat rules are imposed."
-	)
-	var actions := DeckitLabUI.controls(page)
-	DeckitLabUI.button(actions, "Draw to hand", _transfer.bind(&"draw", &"hand"))
-	DeckitLabUI.button(actions, "Move to table", _transfer.bind(&"hand", &"table"))
-	DeckitLabUI.button(actions, "Discard from table", _transfer.bind(&"table", &"discard"))
-	DeckitLabUI.button(actions, "Recycle discard", _transfer.bind(&"discard", &"draw"))
-	DeckitLabUI.button(actions, "Shuffle draw", _shuffle)
-	selected_actions.append(DeckitLabUI.button(actions, "Flip selected", _flip))
-	selected_actions.append(DeckitLabUI.button(actions, "+1 counter", _add_counter))
-	DeckitLabUI.button(actions, "Reset", _reset)
-
-	var zones_row := HBoxContainer.new()
-	zones_row.add_theme_constant_override("separation", 12)
-	page.add_child(zones_row)
-	for zone_id in ZONE_IDS:
-		var panel := VBoxContainer.new()
-		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		zones_row.add_child(panel)
-		var label := DeckitLabUI.heading(panel, String(zone_id).capitalize())
-		counts[zone_id] = label
-		var item_list := ItemList.new()
-		item_list.custom_minimum_size = Vector2(170, 230)
-		item_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		item_list.item_selected.connect(_on_selected.bind(zone_id))
-		panel.add_child(item_list)
-		lists[zone_id] = item_list
-	var visual_row := DeckitLabCardArt.zone_row(page)
-	for id in ZONE_IDS:
-		var view := DeckitLabCardArt.zone_panel(visual_row, game, id, &"demo", 2)
-		visual_zones.append(view)
-		view.card_requested.connect(_on_visual_selected)
-	selection_info = DeckitLabUI.info(page, "")
+	var page := DeckitLabUI.page(self, "01 · Tabletop / Mesa",
+		"Draw → play → discard. Drag cards between zones; on the table, place them anywhere. A cancelled or illegal drop changes nothing.")
+	DeckitLabUI.info(page, "Try: draw two cards, drag one onto the table, move it again, then flip it. FRONT/FRENTE is light; BACK/DORSO is navy. Hand capacity is 5.")
+	var controls := DeckitLabUI.controls(page)
+	DeckitLabUI.button(controls, "Draw a card", _draw_card)
+	for id in [&"hand", &"table", &"discard", &"draw"]:
+		chosen_buttons.append(DeckitLabUI.button(controls, "Move selected → %s" % id, _move_selected.bind(id)))
+	chosen_buttons.append(DeckitLabUI.button(controls, "Flip selected", _flip))
+	chosen_buttons.append(DeckitLabUI.button(controls, "+1 marker", _counter))
+	DeckitLabUI.button(controls, "Shuffle draw", _shuffle)
+	DeckitLabUI.button(controls, "Reset", _reset)
+	selection_label = DeckitLabUI.info(page, "")
 	status = DeckitLabUI.info(page, "")
-	game.action_applied.connect(_on_applied)
-	game.action_rejected.connect(_on_rejected)
+	var row := DeckitLabCardArt.zone_row(page)
+	for id in [&"draw", &"hand", &"discard"]:
+		var view := DeckitLabCardArt.zone_panel(row, game, id, &"demo", 0 if id == &"hand" else 1)
+		_setup_view(view, id)
+	DeckitLabUI.heading(page, "TABLE · Drag to arrange freely / Arrow keys move a selected card")
+	var surface := PanelContainer.new()
+	page.add_child(surface)
+	var table := DeckitZoneView.new()
+	table.free_layout = true
+	table.table_height = 260
+	surface.add_child(table)
+	_setup_view(table, &"table")
+	DeckitLabUI.info(page, "Keyboard: Tab to a card, Enter/Space to select, then use the move/flip buttons. Select a table card and use arrow keys to reposition it. Integration: docs/RECIPES.md (#1–3).")
+	game.action_rejected.connect(func(_action: DeckitCardAction) -> void:
+		status.text = "Move refused: card missing, same zone or destination full. Original position preserved.")
 	_reset()
+
+
+func _setup_view(view: DeckitZoneView, id: StringName) -> void:
+	view.drag_enabled = true
+	view.drop_enabled = true
+	view.actor_id = &"demo"
+	view.card_requested.connect(_select)
+	view.drop_completed.connect(func(action: DeckitCardAction, accepted: bool) -> void:
+		if accepted:
+			_select(action.destination_zone_id, action.card_instance_id)
+			status.text = "Placed in %s. Zone rules still apply; coordinates are presentation only." % action.destination_zone_id)
+	views[id] = view
 
 
 func _reset() -> void:
 	game.zones.clear()
-	selection.clear()
-	for id in ZONE_IDS:
+	for id in IDS:
 		game.register_zone(DeckitCardZone.new(id, &"demo"))
+	game.get_zone(&"draw").visibility = DeckitCardZone.Visibility.HIDDEN
 	game.get_zone(&"hand").capacity = 5
-	var definitions: Array[DeckitCardDefinition] = []
-	for index in range(3):
+	for i in range(8):
 		var definition := DeckitCardDefinition.new()
-		definition.card_id = StringName("sample-%d" % index)
-		definition.display_name = "Sample %s" % char(65 + index)
-		definition.tags = PackedStringArray(["demo", "group-%d" % index])
-		definition.attributes = {"cost": index, "power": index + 1}
+		definition.card_id = StringName("sample-%d" % i)
+		definition.display_name = "Card %s" % char(65 + i)
 		DeckitLabCardArt.decorate(definition)
-		definitions.append(definition)
-	for index in range(9):
-		var card := DeckitCardInstance.new(
-			definitions[index % definitions.size()],
-			StringName("instance-%02d" % (index + 1))
-		)
+		var card := DeckitCardInstance.new(definition, StringName("copy-%d" % i))
 		card.face_up = true
 		card.owner_id = &"demo"
-		card.controller_id = &"demo"
 		game.get_zone(&"draw").add_card(card)
-	status.text = "Reset: 9 unique card instances share 3 definitions. Hand capacity: 5."
-	for index in range(visual_zones.size()):
-		visual_zones[index].bind(game, ZONE_IDS[index], &"demo")
-	_refresh()
+	for id in views:
+		views[id].card_positions.clear()
+		views[id].bind(game, id, &"demo")
+	selected_zone = &""
+	selected_id = &""
+	rng.seed = 314159
+	_sync()
+	status.text = "Ready: draw or drag the top card. Hidden draw pile deliberately shows the back."
 
 
-func _on_selected(index: int, zone_id: StringName) -> void:
-	var zone := game.get_zone(zone_id)
-	if index >= 0 and index < zone.cards.size():
-		_set_selection(zone_id, zone.cards[index].instance_id)
+func _select(zone: StringName, id: StringName) -> void:
+	selected_zone = zone
+	selected_id = id
+	_sync()
+	var card_view := views[zone].get_card_view(id)
+	if card_view != null:
+		card_view.grab_focus()
 
 
-func _on_visual_selected(zone_id: StringName, instance_id: StringName) -> void:
-	_set_selection(zone_id, instance_id)
+func _sync() -> void:
+	for id in views:
+		var chosen: Array[StringName] = []
+		if id == selected_zone:
+			chosen.append(selected_id)
+		views[id].set_selected_cards(chosen)
+	var valid: bool = game.get_zone(selected_zone) != null and game.get_zone(selected_zone).find_by_id(selected_id) != null
+	for button in chosen_buttons:
+		button.disabled = not valid
+	selection_label.text = "Selected: %s · %s" % [selected_id, selected_zone] if valid else "Select any card to use the buttons. Dragging does not require prior selection."
 
 
-func _set_selection(zone_id: StringName, instance_id: StringName) -> void:
-	selection.clear()
-	selection[zone_id] = instance_id
-	_sync_selection()
-
-
-func _chosen(zone_id: StringName) -> DeckitCardInstance:
-	var zone := game.get_zone(zone_id)
-	var card: DeckitCardInstance = zone.find_by_id(selection.get(zone_id, &""))
-	return card if card != null else zone.peek_top()
-
-
-func _transfer(source: StringName, destination: StringName) -> void:
-	var card := _chosen(source)
+func _draw_card() -> void:
+	var card := game.get_zone(&"draw").peek_top()
 	if card == null:
-		status.text = "Nothing to move from %s." % source
+		status.text = "Draw pile empty. Move cards from discard back to draw or reset."
 		return
-	var action := DeckitCardAction.new(source, destination, card.instance_id, &"demo")
-	if game.perform(action):
-		selection.clear()
-		selection[destination] = card.instance_id
-	_refresh()
+	_select(&"draw", card.instance_id)
+	_move_selected(&"hand")
 
 
-func _shuffle() -> void:
-	game.get_zone(&"draw").shuffle_with_rng(randomizer)
-	selection.clear()
-	status.text = "Shuffled with caller-owned RNG seed 314159 (no global randomizer)."
-	_refresh()
+func _move_selected(destination: StringName) -> void:
+	if game.perform(DeckitCardAction.new(selected_zone, destination, selected_id, &"demo")):
+		_select(destination, selected_id)
+		status.text = "Moved to %s." % destination
 
 
 func _flip() -> void:
-	var card := _first_chosen()
-	if card == null:
-		status.text = "Select a card in a zone to flip it."
+	var target := DeckitCardTarget.new(selected_zone, selected_id)
+	game.perform(DeckitEffectAction.new().configure(DeckitFaceEffect.new(), target, &"demo"))
+	status.text = "Face toggled. Hidden zones continue concealing the front."
+
+
+func _counter() -> void:
+	var effect := DeckitCounterEffect.new()
+	effect.counter_key = &"marker"
+	effect.delta = 1
+	game.perform(DeckitEffectAction.new().configure(effect, DeckitCardTarget.new(selected_zone, selected_id), &"demo"))
+
+
+func _shuffle() -> void:
+	game.get_zone(&"draw").shuffle_with_rng(rng)
+	views[&"draw"].refresh()
+	status.text = "Draw pile shuffled with a caller-owned RNG."
+
+
+func _input(event: InputEvent) -> void:
+	if selected_zone != &"table" or not event is InputEventKey or not event.is_pressed():
 		return
-	card.face_up = not card.face_up
-	status.text = "Toggled face for %s." % card.instance_id
-	_refresh()
-
-
-func _add_counter() -> void:
-	var card := _first_chosen()
-	if card == null:
-		status.text = "Select a card in a zone to add a counter."
+	if get_viewport().gui_get_focus_owner() != views[&"table"].get_card_view(selected_id):
 		return
-	card.change_counter(&"marker", 1)
-	status.text = "Marker added to %s." % card.instance_id
-	_refresh()
-
-
-func _first_chosen() -> DeckitCardInstance:
-	for zone_id in [&"hand", &"table", &"discard", &"draw"]:
-		var zone := game.get_zone(zone_id)
-		var card: DeckitCardInstance = zone.find_by_id(selection.get(zone_id, &""))
-		if card != null:
-			return card
-	return null
-
-
-func _on_applied(action: DeckitCardAction) -> void:
-	status.text = "OK: %s moved %s → %s." % [
-		action.card_instance_id, action.source_zone_id, action.destination_zone_id
-	]
-
-
-func _on_rejected(action: DeckitCardAction) -> void:
-	status.text = "REJECTED: %s → %s (missing card, duplicate or destination full)." % [
-		action.source_zone_id, action.destination_zone_id
-	]
-
-
-func _refresh() -> void:
-	for view in visual_zones:
-		view.refresh()
-	for zone_id in ZONE_IDS:
-		var zone := game.get_zone(zone_id)
-		var display := lists[zone_id]
-		display.clear()
-		counts[zone_id].text = "%s (%d)" % [String(zone_id).capitalize(), zone.size()]
-		for index in range(zone.cards.size()):
-			var card: DeckitCardInstance = zone.cards[index]
-			display.add_item("%s %s • %s • markers:%d" % [
-				card.definition.display_name,
-				card.instance_id,
-				"up" if card.face_up else "down",
-				card.get_counter(&"marker")
-			])
-			if card.instance_id == selection.get(zone_id, &""):
-				display.select(index)
-	_sync_selection()
-
-
-func _sync_selection() -> void:
-	if selection_info == null:
-		return
-	var active_zone: StringName = &""
-	var active_card: StringName = &""
-	for zone_id in ZONE_IDS:
-		var id: StringName = selection.get(zone_id, &"")
-		if id != &"" and game.get_zone(zone_id).find_by_id(id) != null:
-			active_zone = zone_id
-			active_card = id
-			break
-	if active_card == &"":
-		selection.clear()
-	for index in range(visual_zones.size()):
-		var ids: Array[StringName] = []
-		if ZONE_IDS[index] == active_zone:
-			ids.append(active_card)
-		visual_zones[index].set_selected_cards(ids)
-	selection_info.text = "Selected: %s (%s). Click any visible card or its list row." % [
-		active_card if active_card != &"" else &"none",
-		active_zone if active_card != &"" else &"no zone"
-	]
-	for control in selected_actions:
-		control.disabled = active_card == &""
+	var direction := Vector2.ZERO
+	if event.is_action("ui_left"): direction.x = -1
+	elif event.is_action("ui_right"): direction.x = 1
+	elif event.is_action("ui_up"): direction.y = -1
+	elif event.is_action("ui_down"): direction.y = 1
+	if direction != Vector2.ZERO:
+		var view: DeckitZoneView = views[&"table"]
+		view.set_card_position(selected_id, view.card_positions.get(selected_id, Vector2.ZERO) + direction * 16)
+		get_viewport().set_input_as_handled()

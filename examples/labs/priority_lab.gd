@@ -1,165 +1,208 @@
-## Demonstrates a generic priority window; no game-specific timing rules.
+## One guided scenario combining optional mechanics without defining game rules in the addon.
 extends Control
 
+const RESPONDER = preload("res://examples/labs/sample_event_responder.gd")
+const ACCESS_RULE = preload("res://examples/labs/sample_access_rule.gd")
 var game := DeckitGameState.new()
 var timeline := DeckitTurnManager.new()
 var window := DeckitPriorityWindow.new()
 var queue := DeckitEventQueue.new()
-var bridge := DeckitPriorityEventBridge.new()
 var gate := DeckitPriorityTurnGate.new()
 var hand := DeckitCardZone.new(&"hand")
 var table := DeckitCardZone.new(&"table")
+var staged: Array[DeckitCardAction] = []
+var chosen := DeckitTargetSelection.new(1)
+var views: Array[DeckitZoneView] = []
 var status: Label
+var hint: Label
 var history: Label
-var zone_views: Array[DeckitZoneView] = []
-var staged_cards: HFlowContainer
-var staged_actions: Array[DeckitCardAction] = []
+var stack_row: HFlowContainer
+var stage_button: Button
+var pass_button: Button
+var resolve_button: Button
+var effect_button: Button
+var rule: DeckitCardRule
 
 
 func _ready() -> void:
-	var page := DeckitLabUI.page(self, "08 • Priority Window",
-		"Open a window, stage responses, pass in order, then resolve one action. The optional turn gate blocks transitions while the window is open.")
-	var buttons := DeckitLabUI.controls(page)
-	DeckitLabUI.button(buttons, "Open window", _open)
-	DeckitLabUI.button(buttons, "Stage current player's card", _stage)
-	DeckitLabUI.button(buttons, "Pass priority", _pass)
-	DeckitLabUI.button(buttons, "Resolve next", _resolve)
-	DeckitLabUI.button(buttons, "Next phase", _next_phase)
-	DeckitLabUI.button(buttons, "Close empty", _close)
-	DeckitLabUI.button(buttons, "Cancel window", _cancel)
-	DeckitLabUI.button(buttons, "Drain event log", _drain)
-	DeckitLabUI.button(buttons, "Reset", _reset)
-	var panels := DeckitLabCardArt.zone_row(page)
-	zone_views.append(DeckitLabCardArt.zone_panel(panels, game, &"hand", &"", 3))
-	zone_views.append(DeckitLabCardArt.zone_panel(panels, game, &"table", &"", 3))
-	DeckitLabUI.heading(page, "Response stack — last in, first out")
-	staged_cards = DeckitLabCardArt.zone_row(page)
+	var page := DeckitLabUI.page(self, "02 · Rules & responses / Reglas y respuestas",
+		"Select A, open a window and stage it; select B and stage the response. Pass twice, resolve B, then process reactions. Pass twice again to resolve A.")
+	DeckitLabUI.info(page, "Cards remain in hand while proposed. Only resolution changes zones. Card C is deliberately restricted: compare rejection with the accepted moves.")
+	var controls := DeckitLabUI.controls(page)
+	DeckitLabUI.button(controls, "Open window", _open)
+	stage_button = DeckitLabUI.button(controls, "Stage selected", _stage)
+	pass_button = DeckitLabUI.button(controls, "Pass priority", _pass)
+	resolve_button = DeckitLabUI.button(controls, "Resolve next", _resolve)
+	DeckitLabUI.button(controls, "Process reactions", _react)
+	effect_button = DeckitLabUI.button(controls, "Conditional +1 charge", _effect)
+	DeckitLabUI.button(controls, "Next phase", _next_phase)
+	DeckitLabUI.button(controls, "LIFO / FIFO (empty window)", _order)
+	DeckitLabUI.button(controls, "Cancel window", _cancel)
+	DeckitLabUI.button(controls, "Reset", _reset)
 	status = DeckitLabUI.info(page, "")
-	history = DeckitLabUI.info(page, "Actions:")
+	hint = DeckitLabUI.info(page, "")
+	var row := DeckitLabCardArt.zone_row(page)
+	for id in [&"hand", &"table"]:
+		var view := DeckitLabCardArt.zone_panel(row, game, id, &"", 0)
+		view.card_requested.connect(_select)
+		views.append(view)
+	DeckitLabUI.heading(page, "Resolution order → first card shown resolves next")
+	stack_row = DeckitLabCardArt.zone_row(page)
+	history = DeckitLabUI.info(page, "")
+	DeckitLabUI.info(page, "Integration: docs/RECIPES.md (#4–6). Rules and conditions must be pure checks; event reactions are explicitly drained. No automatic rollback.")
 	game.register_zone(hand)
 	game.register_zone(table)
-	timeline.configure([&"one", &"two"], [&"begin", &"action", &"end"])
+	rule = ACCESS_RULE.new()
+	rule.destination_id = &"table"
+	rule.required_actor = &""
+	game.register_rule(rule)
 	gate.priority_window = window
 	timeline.add_rule(gate)
-	timeline.start()
+	queue.register_responder(RESPONDER.new())
 	queue.bind(game)
-	bridge.bind(window, queue)
-	window.action_staged.connect(func(_actor: StringName, action: DeckitCardAction) -> void:
-		staged_actions.append(action)
-		_update_stack()
-	)
-	window.action_cancelled.connect(func(_action: DeckitCardAction) -> void:
-		if not staged_actions.is_empty():
-			staged_actions.pop_back()
-		_update_stack()
-	)
 	window.action_resolved.connect(func(action: DeckitCardAction, success: bool) -> void:
-		staged_actions.erase(action)
-		_update_stack()
-		_log("Resolved %s: %s" % [action.card_instance_id, success])
-	)
-	window.resolution_ready.connect(func(count: int) -> void: _log("Ready to resolve (%d pending)" % count))
+		staged.erase(action)
+		_log("%s: %s" % [action.card_instance_id, "moved to table" if success else "REJECTED by rule/state"]))
 	_reset()
 
 
 func _reset() -> void:
 	window.cancel()
+	staged.clear()
+	chosen.clear()
 	hand.cards.clear()
 	table.cards.clear()
 	queue.clear_pending()
+	queue.clear_trace()
+	timeline.stop()
+	timeline.configure([&"one", &"two"], [&"begin", &"action", &"end"])
+	timeline.start()
+	window.resolution_order = DeckitPriorityWindow.ResolutionOrder.LIFO
 	for index in range(3):
 		var definition := DeckitCardDefinition.new()
 		definition.card_id = StringName("demo-%d" % index)
-		definition.display_name = "Sample %d" % index
+		definition.display_name = "Card %s%s" % [char(65 + index), " (restricted)" if index == 2 else ""]
+		definition.tags = PackedStringArray(["allowed"] if index != 2 else ["restricted"])
 		DeckitLabCardArt.decorate(definition)
-		var instance := DeckitCardInstance.new(definition, StringName("card-%d" % index))
-		instance.face_up = true
-		hand.add_card(instance)
-	if not timeline.is_running:
-		timeline.start()
-	staged_actions.clear()
-	_update_stack()
-	for index in range(zone_views.size()):
-		zone_views[index].bind(game, [&"hand", &"table"][index])
-	history.text = "Actions:"
+		var card := DeckitCardInstance.new(definition, StringName("card-%d" % index))
+		card.face_up = true
+		hand.add_card(card)
+	for index in range(views.size()):
+		views[index].bind(game, [&"hand", &"table"][index])
+	history.text = "Results: reset complete."
+	_refresh()
+
+
+func _select(zone: StringName, id: StringName) -> void:
+	chosen.clear()
+	chosen.select(game, zone, id)
 	_refresh()
 
 
 func _open() -> void:
-	_log("Open: %s" % window.open_from_turn(game, timeline, &"sample-window"))
+	_log("Open window: %s" % window.open_from_turn(game, timeline))
 	_refresh()
 
 
+func _is_staged(id: StringName) -> bool:
+	for action in staged:
+		if action.card_instance_id == id:
+			return true
+	return false
+
+
 func _stage() -> void:
-	var actor := window.current_participant()
-	var card := hand.peek_top()
-	if card == null:
-		_log("No card available")
+	var target := chosen.first()
+	if target == null or target.zone_id != &"hand" or _is_staged(target.instance_id):
 		return
-	var action := DeckitCardAction.new(&"hand", &"table", card.instance_id, actor)
-	_log("Stage for %s: %s" % [actor, window.submit_action(actor, action)])
+	var action := DeckitCardAction.new(&"hand", &"table", target.instance_id, window.current_participant())
+	if window.submit_action(action.actor_id, action):
+		staged.append(action)
+		_log("Staged %s by %s (not yet executed)." % [action.card_instance_id, action.actor_id])
+		chosen.clear()
 	_refresh()
 
 
 func _pass() -> void:
-	var actor := window.current_participant()
-	_log("Pass %s: %s" % [actor, window.pass_priority(actor)])
+	window.pass_priority(window.current_participant())
 	_refresh()
 
 
 func _resolve() -> void:
-	_log("Resolve result: %s" % window.resolve_next())
+	window.resolve_next()
+	chosen.clear()
+	_refresh()
+
+
+func _react() -> void:
+	_log("Processed %d queued events. Accepted arrivals gain an arrival counter." % queue.drain())
+	_refresh()
+
+
+func _effect() -> void:
+	var target := chosen.first()
+	if target == null:
+		return
+	var effect := DeckitCounterEffect.new()
+	effect.counter_key = &"charge"
+	effect.delta = 1
+	var action := DeckitEffectAction.new().configure(effect, target, timeline.current_participant())
+	var condition := DeckitTagCondition.new()
+	condition.tag = "allowed"
+	action.conditions.append(condition)
+	_log("Conditional charge: %s" % game.perform(action))
 	_refresh()
 
 
 func _next_phase() -> void:
-	_log("Advance timeline: %s" % timeline.next_phase())
-	_refresh()
-
-
-func _close() -> void:
-	_log("Close: %s" % window.close())
+	_log("Next phase: %s (blocked while window is open)." % timeline.next_phase())
 	_refresh()
 
 
 func _cancel() -> void:
-	_log("Cancel: %s" % window.cancel())
+	window.cancel()
+	staged.clear()
+	_log("Unresolved proposals cancelled; earlier results are retained.")
 	_refresh()
 
 
-func _drain() -> void:
-	_log("Processed %d events" % queue.drain())
+func _order() -> void:
+	if window.pending_count() > 0:
+		_log("Resolve or cancel proposals before changing the order.")
+	else:
+		window.resolution_order = DeckitPriorityWindow.ResolutionOrder.FIFO if window.resolution_order == DeckitPriorityWindow.ResolutionOrder.LIFO else DeckitPriorityWindow.ResolutionOrder.LIFO
 	_refresh()
 
 
 func _log(message: String) -> void:
-	history.text += "\n" + message
-	if history.text.length() > 1800:
-		history.text = "Actions:\n" + history.text.right(1300)
+	history.text = (history.text + "\n" + message).right(1100)
 
 
 func _refresh() -> void:
-	for view in zone_views:
+	var target := chosen.first()
+	for view in views:
 		view.refresh()
-	status.text = "Open: %s | Holder: %s | Passes: %d | Ready: %s | Staged: %d | Hand: %d | Table: %d | Phase: %s | Events: %d" % [
-		window.is_open, window.current_participant(), window.consecutive_passes,
-		window.ready_to_resolve, window.pending_count(), hand.size(), table.size(),
-		timeline.current_phase(), queue.pending_count()
-	]
-
-
-func _update_stack() -> void:
-	if staged_cards == null:
-		return
-	for child in staged_cards.get_children():
-		staged_cards.remove_child(child)
+		var ids: Array[StringName] = []
+		if target != null and target.zone_id == view.zone_id:
+			ids.append(target.instance_id)
+		view.set_selected_cards(ids)
+	stage_button.disabled = not window.is_open or window.ready_to_resolve or target == null or target.zone_id != &"hand" or _is_staged(target.instance_id)
+	pass_button.disabled = not window.is_open or window.ready_to_resolve
+	resolve_button.disabled = not window.ready_to_resolve or window.pending_count() == 0
+	effect_button.disabled = target == null or target.resolve(game) == null
+	var order := "LIFO" if window.resolution_order == DeckitPriorityWindow.ResolutionOrder.LIFO else "FIFO"
+	status.text = "Turn: %s · Phase: %s · Priority: %s · Passes: %d/2 · %s · Pending reactions: %d" % [timeline.current_participant(), timeline.current_phase(), window.current_participant(), window.consecutive_passes, order, queue.pending_count()]
+	hint.text = "Next: open a window and select a hand card." if not window.is_open else ("Next: resolve one proposal." if window.ready_to_resolve else "Next: stage a different card, or pass priority with both players.")
+	for child in stack_row.get_children():
+		stack_row.remove_child(child)
 		child.queue_free()
-	for index in range(staged_actions.size() - 1, -1, -1):
-		var action: DeckitCardAction = staged_actions[index]
-		var card: DeckitCardInstance = hand.find_by_id(action.card_instance_id)
-		if card == null:
-			card = table.find_by_id(action.card_instance_id)
+	var ordered := staged.duplicate()
+	if window.resolution_order == DeckitPriorityWindow.ResolutionOrder.LIFO:
+		ordered.reverse()
+	for action in ordered:
+		var card := hand.find_by_id(action.card_instance_id)
 		if card != null:
-			var image := DeckitLabCardArt.card_button(staged_cards, card, true)
+			var image := DeckitLabCardArt.card_button(stack_row, card, true)
 			image.disabled = true
-			image.tooltip_text = "Resolution %d: %s" % [staged_actions.size() - index, action.card_instance_id]
+	if ordered.is_empty():
+		DeckitLabUI.info(stack_row, "No proposals. Select a card and stage it.")

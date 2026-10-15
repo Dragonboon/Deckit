@@ -98,3 +98,11 @@ Run `res://examples/labs/lab_hub.tscn` **in the Deckit repository project** to e
 ## Where to go next
 
 Use the [API reference](REFERENCE.md) to add your own rules, effects, turn manager and priority windows. For import or editor errors, see [Testing and troubleshooting](TESTING.md).
+
+
+## Learn common integrations
+
+Press F5 in this repository to open three focused labs. Start with the tabletop
+for draw/discard, selecting, dragging between zones and free placement. Continue
+with rules/responses and the deck workshop. Follow the [seven mini-tutorials](RECIPES.md)
+for small code examples you can adapt to your own game.

@@ -1,58 +1,52 @@
-# Deckit examples
+# Three focused labs
 
-Open the Deckit repository in **Godot 4.7.x**, then run:
+Open the repository in **Godot 4.7.x** and press **F5**. The main scene is
+`res://examples/labs/lab_hub.tscn`. Only `addons/deckit/` belongs in your own game;
+all sample policies, SVGs and tutorials remain outside the plugin.
 
-```text
-res://examples/labs/lab_hub.tscn
-```
+| Lab | Scene | Repeatable exercise |
+|---|---|---|
+| 01 · Tabletop | `examples/labs/zone_flow_lab.tscn` | Draw two cards, drag to the table, arrange freely, flip, add a marker and discard. Try a full hand or release outside a target. |
+| 02 · Rules & responses | `examples/labs/priority_lab.tscn` | Stage A then B, pass with both players, resolve B and process its arrival reaction. Compare LIFO/FIFO and reject restricted card C. |
+| 03 · Deck workshop | `examples/labs/deck_builder_lab.tscn` | Start from four valid cards, exceed a copy limit, fix it, save/load JSON and build independent runtime copies. |
 
-The nine feature labs and three original microgames are **optional**. Most card-oriented scenarios now display reusable front/back SVG placeholders and respond to card clicks. The placeholder artwork lives under `examples/assets/`, not the installable plugin. Only `addons/deckit/` is needed in your own game.
+Every lab offers a reset, visible state and instructions. The old isolated
+presentation, rule, effect, event and turn scenes have been consolidated into
+these workflows; the reusable plugin modules remain available independently.
 
-## Nine interactive feature labs
+## Cards and interaction
 
-| Lab | Scene inside `examples/labs/` | What to try |
-| --- | --- | --- |
-| 01 · Zone Flow | `zone_flow_lab.tscn` | Draw, transfer, discard, recycle, shuffle, flip and counters |
-| 02 · Rule Gates | `rule_gate_lab.tscn` | Allow/deny moves by optional tags, actors and capacity |
-| 03 · Classic Visuals | `legacy_ui_lab.tscn` | Classic hand layouts, card flipping and piles |
-| 04 · State and Presentation | `presenter_lab.tscn` | Bind views to zones, reveal only permitted faces |
-| 05 · Targets and Effects | `actions_lab.tscn` | Target cards, conditions, counters, face effects and action sequences |
-| 06 · Event Queue | `events_lab.tscn` | Publish, order, resolve and cancel events |
-| 07 · Turns and Phases | `turns_lab.tscn` | Configure participants, advance phases, pause and resume |
-| 08 · Priority Windows | `priority_lab.tscn` | Stage actions, pass, resolve and prevent turn advances |
-| 09 · Deck Builder | `deck_builder_lab.tscn` | Search card catalogs, add/remove copies, validate and save JSON |
+- Light **FRONT / FRENTE** versus navy **BACK / DORSO**, with an asymmetric front
+  and a patterned back. Text sits in its own caption area rather than beside a shrinking icon.
+- Selection has a gold outline and explicit SELECTED label. Hidden cards never
+  show their title or counters in the caption or drag preview.
+- Drag between zones in lab 01. Zone capacity and optional rules still apply.
+  Position within the table is UI state; it does not reorder or transfer cards.
+- A failed/cancelled drop leaves the original in place. A payload from another
+  game, or from a card replaced during a reset, is rejected.
+- Keyboard: Tab/Shift+Tab, Enter/Space and move buttons. Arrow keys reposition the
+  selected table card while that card has focus.
 
-## Three playable microgames
+The drag interaction is opt-in in the plugin. See [integration recipes](RECIPES.md)
+for a minimal setup, hidden hands, effects, event reactions and response windows.
 
-| Game | Scene inside `examples/microgames/` | Demonstrates |
-| --- | --- | --- |
-| Spanish Tricks | `spanish_tricks.tscn` | 40 Spanish cards; two-player follow-suit and trump, three tricks |
-| French Melds | `french_melds.tscn` | 52 French cards; find runs and sets, gain points |
-| Resource Duel | `resource_duel.tscn` | Custom cards, energy, costs, shield, damage and turns |
+## Optional playable references
 
-These are original **integration examples**, not full recreations of Brisca, Tute, Rummy, Poker or any licensed TCG/LCG. The scenario policies live under `examples/`; installing Deckit does not impose them on a consuming game.
+The hub has one expandable section for three small original games:
 
-## Testing the examples
+| Scene under `examples/microgames/` | Mechanics |
+|---|---|
+| `spanish_tricks.tscn` | Spanish 40-card deck, follow-suit, trump, three tricks |
+| `french_melds.tscn` | French 52-card deck, three-card runs/sets and score |
+| `resource_duel.tscn` | Custom cards, energy, shields, damage and turns |
 
-The labs are intended for graphical, interactive use. The microgame regression test runs headlessly:
+They are reference integrations, not complete commercial game recreations. Their
+rules are not installed with Deckit. Traditional hand/pile controls also remain
+in the add-on, but are separate from the state-backed views used in the labs.
 
-```sh
-godot --headless --path . --import
-godot --headless --path . --script res://tests/headless/test_microgames.gd
-```
+## Verify
 
-See [Testing and troubleshooting](TESTING.md) for the complete local test suite.
-
-## Stacks, reactions, customization
-
-- **Response stack:** `DeckitPriorityWindow` stages proposals, collects passes, then resolves one action at a time in selectable **LIFO/FIFO** order. The Priority lab displays staged cards in their expected resolution order; a full commercial-style TCG stack and automatic priority timing are **not** implicit.
-- **Reactions to movement:** binding `DeckitEventQueue` to `DeckitGameState` publishes `action.applied`/`action.rejected`. A `DeckitEventResponder` can check movement source/destination, return new actions, and queue those outcomes. The Events lab displays emitted and resolved notifications with a representative card.
-- **Customization:** card definitions support any tags and attributes; games register `DeckitCardRule`, `DeckitCardCondition`, `DeckitCardEffect`, `DeckitDeckRule`, event responders, and optional turn/priority policies. Demo-specific policies remain outside `addons/deckit/`.
-
-The sample artwork illustrates presentation, not network secrecy: never transmit concealed card definitions to unauthorized clients.
-
-## Selecting cards in the visual labs
-
-Card buttons now highlight selection with a **gold border and SELECTED label**. Where a list and cards are shown together, clicking either selects the same runtime card. Labs disable selection-dependent actions until a valid selection exists. The French Melds microgame requires **exactly three** selected cards; click a selected card again to deselect it. Other playable examples use single selection. After a move, the selection is cleared or transferred according to the scenario.
-
-The light **front** placeholder carries a simple Deckit D monogram on white; the decorative navy **back** remains unchanged. Both are illustrations only and do not change game logic.
+See [Testing](TESTING.md). The new regressions exercise both direct drop contracts
+and real GUI mouse events dispatched through Godot's native Control drag engine,
+plus the complete guided workflows. Still check your own theme, resolution,
+input devices and game policies when integrating.
