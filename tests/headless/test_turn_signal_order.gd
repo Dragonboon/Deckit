@@ -37,5 +37,9 @@ func _run() -> void:
 	_check(visited[0] == "end:a:start:a:start", "Outgoing phase before mutation")
 	_check(visited[1] == "turn:a:a:start", "Outgoing turn before mutation")
 	_check(turns.current_participant() == &"b" and not reentered, "Incoming start guarded")
+	# Lambdas above capture the RefCounted emitter; disconnect before releasing it.
+	for descriptor in turns.get_signal_list():
+		for connection in turns.get_signal_connection_list(descriptor.name):
+			turns.disconnect(descriptor.name, connection.callable)
 	print("[Deckit signal order] %d passed, %d failed" % [passed, failed])
 	quit(0 if failed == 0 else 1)

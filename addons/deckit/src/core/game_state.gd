@@ -27,17 +27,20 @@ func register_rule(rule: DeckitCardRule) -> bool:
 	return true
 
 
-func perform(action: DeckitCardAction) -> bool:
-	if action == null:
-		return false
-	if not action.can_apply(self):
-		action_rejected.emit(action)
+## Rules/conditions must be side-effect free: UI may query this during a drag.
+func can_perform(action: DeckitCardAction) -> bool:
+	if action == null or not action.can_apply(self):
 		return false
 	for rule in rules:
 		if rule != null and not rule.allows(action, self):
-			action_rejected.emit(action)
 			return false
-	if not action.apply(self):
+	return true
+
+
+func perform(action: DeckitCardAction) -> bool:
+	if action == null:
+		return false
+	if not can_perform(action) or not action.apply(self):
 		action_rejected.emit(action)
 		return false
 	action_applied.emit(action)

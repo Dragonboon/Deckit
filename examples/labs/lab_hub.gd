@@ -2,33 +2,28 @@ extends Control
 
 
 func _ready() -> void:
-	var page := DeckitLabUI.page(
-		self, "Deckit • Example Labs",
-		"Isolated scenarios for inspecting reusable card mechanics. The labs live outside addons/deckit/ and are not game-specific modules."
-	)
-	DeckitLabUI.heading(page, "Choose an experiment")
-	DeckitLabUI.button(page, "01  Zone flow: draw, move, shuffle, flip, counters", _open.bind("zone_flow_lab"))
-	DeckitLabUI.button(page, "02  Rule gates: optional rule, ownership, capacity", _open.bind("rule_gate_lab"))
-	DeckitLabUI.button(page, "03  Visual components: layouts, drag, pile, card faces", _open.bind("legacy_ui_lab"))
-	DeckitLabUI.button(page, "04  State + presentation: observable zones and viewer access", _open.bind("presenter_lab"))
-	DeckitLabUI.button(page, "05  Targets, effects, conditions and sequences", _open.bind("actions_lab"))
-	DeckitLabUI.button(page, "06  Event queue: notifications, priorities and responses", _open.bind("events_lab"))
-	DeckitLabUI.button(page, "07  Optional timeline: phases, turns and pause", _open.bind("turns_lab"))
-	DeckitLabUI.button(page, "08  Priority windows: passes, responses and resolution", _open.bind("priority_lab"))
-	DeckitLabUI.button(page, "09  Deck Builder: catalog, editing and validation", _open.bind("deck_builder_lab"))
-	DeckitLabUI.heading(page, "Playable examples (rules outside the plugin)")
-	DeckitLabUI.button(page, "10  Spanish Tricks: follow suit, trump, 3 tricks", _open_microgame.bind("spanish_tricks"))
-	DeckitLabUI.button(page, "11  French Melds: runs, sets and score", _open_microgame.bind("french_melds"))
-	DeckitLabUI.button(page, "12  Resource Duel: energy, protection and effects", _open_microgame.bind("resource_duel"))
-	DeckitLabUI.info(
-		page,
-		"Use Tab and Shift+Tab to navigate; Enter or Space activates focused buttons. Each example is independent of the installable addon."
-	)
+	var page := DeckitLabUI.page(self, "Deckit · Learn by playing",
+		"Three focused labs. Each has a repeatable exercise, visible state and a Reset button. Start at 01; add only the modules your game needs.")
+	DeckitLabUI.button(page, "01 · TABLETOP — draw, drag, drop, arrange, flip", _open.bind("zone_flow_lab"))
+	DeckitLabUI.info(page, "Learn zones and presentation. Move cards freely while transfers still obey the game state.")
+	DeckitLabUI.button(page, "02 · RULES & RESPONSES — conditions, events, turns, stack", _open.bind("priority_lab"))
+	DeckitLabUI.info(page, "Stage different cards, pass priority and watch a move trigger a visible reaction.")
+	DeckitLabUI.button(page, "03 · DECK WORKSHOP — catalog, limits, save, playtest", _open.bind("deck_builder_lab"))
+	DeckitLabUI.info(page, "Build a valid list, materialize independent card instances and inspect them.")
+	DeckitLabUI.heading(page, "Mini-tutorials / Recetas")
+	DeckitLabUI.info(page, "docs/RECIPES.md: first hand, drag and drop, hidden cards, effects, reactions, turns/stack, deck construction. Examples remain outside addons/deckit/.")
+	var more := VBoxContainer.new()
+	DeckitLabUI.button(page, "Show / hide optional playable examples", func() -> void: more.visible = not more.visible)
+	page.add_child(more)
+	more.hide()
+	for entry in [["Spanish Tricks", "spanish_tricks"], ["French Melds", "french_melds"], ["Resource Duel", "resource_duel"]]:
+		DeckitLabUI.button(more, entry[0], _open_game.bind(entry[1]))
+	DeckitLabUI.info(more, "Reference games with example-specific rules; these are not additional feature labs.")
 
 
-func _open(lab_name: String) -> void:
-	get_tree().change_scene_to_file("res://examples/labs/%s.tscn" % lab_name)
+func _open(scene: String) -> void:
+	get_tree().change_scene_to_file("res://examples/labs/%s.tscn" % scene)
 
 
-func _open_microgame(game_name: String) -> void:
-	get_tree().change_scene_to_file("res://examples/microgames/%s.tscn" % game_name)
+func _open_game(scene: String) -> void:
+	get_tree().change_scene_to_file("res://examples/microgames/%s.tscn" % scene)

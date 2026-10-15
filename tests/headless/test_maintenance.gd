@@ -52,6 +52,8 @@ func _run() -> void:
 	var original_array: Array = [{"list": [1, 2]}]
 	var cloned: Array[Variant] = DeckitUtils.repeat(original_array, 2)
 	_check(cloned.size() == 2, "Repeat remains available")
+	deck_pile.free()
 	view.queue_free()
+	await process_frame
 	print("[Deckit maintenance] %d passed, %d failed" % [passed, failed])
 	quit(0 if failed == 0 else 1)

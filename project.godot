@@ -19,6 +19,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Deckit"
+run/main_scene="res://examples/labs/lab_hub.tscn"
 config/description="Modular Godot toolkit for traditional, TCG, LCG and custom card games."
 config/version="1.0.0"
 config/features=PackedStringArray("4.7", "GL Compatibility")
@@ -26,10 +27,10 @@ config/icon="res://icon.svg"
 
 [display]
 
-window/size/viewport_width=960
-window/size/viewport_height=600
-window/size/window_width_override=960
-window/size/window_height_override=600
+window/size/viewport_width=1120
+window/size/viewport_height=820
+window/size/window_width_override=1120
+window/size/window_height_override=820
 window/stretch/mode="canvas_items"
 
 [editor_plugins]
