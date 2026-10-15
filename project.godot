@@ -19,9 +19,9 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Deckit"
-run/main_scene="res://examples/labs/lab_hub.tscn"
 config/description="Modular Godot toolkit for traditional, TCG, LCG and custom card games."
 config/version="1.0.0"
+run/main_scene="res://examples/labs/lab_hub.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
